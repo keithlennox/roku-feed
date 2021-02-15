@@ -46,10 +46,10 @@ app.use(cors());
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.get('/', (req, res) => {
-  res.send('Hello World!');
   getVideoCount(account);
   getVideos(account);
   getVideoSources(account);
+  res.send('Hello World!');
 });
 app.listen(3000);
 
