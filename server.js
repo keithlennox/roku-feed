@@ -33,18 +33,30 @@ QUESTIONS/TO DO
 - API creds should be read only
 */
 
+const express = require('express');
+const cors = require('cors');
 const axios = require('axios');
 
-//ADD CODE FOR EXPRESS SERVER
-//Recieve incoming request, no payload, just recieves a get request
-//Returns jason object
-
+//Set vars
 const account = "18140038001";
+
+//Express server
+const app = express();
+app.use(cors());
+app.use(express.urlencoded({extended: false}));
+app.use(express.json());
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+  getVideoCount(account);
+  getVideos(account);
+  getVideoSources(account);
+});
+app.listen(3000);
 
 //GET BRIGHTCOVE TOKEN (This will need to check for expiry)
 const getBCToken = async () => {
-const client_id = "";
-const client_secret = "";
+const client_id = "2a703469-6009-4204-bcb3-ba3cec61abf5";
+const client_secret = "4munZY-rUvfs-SnoaMXkkywC_z9Li5fViX_GGOz2k9A-IwkOhEksFiGsdG88g_1JmuYd_60Tvk5wf48Cdvv52g";
 var auth_string = new Buffer(client_id + ":" + client_secret).toString('base64');
 const oauth_body = "grant_type=client_credentials";
 const oauth_options = {
@@ -78,11 +90,10 @@ getVideoCount = async (account) => {
       console.log(error);
   }
 }
-getVideoCount(account);
 
 //GET VIDEOS
 //Add Looping code (100 videos at a time)
-getVideo = async (account) => {
+getVideos = async (account) => {
   try {
       let options = await getBCToken(); //Get token
       let cms_result = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?q=tags:roku", options)
@@ -91,7 +102,6 @@ getVideo = async (account) => {
       console.log(error);
   }
 }
-getVideo(account);
 
 //GET VIDEO SOURCES
 getVideoSources = async (account) => {
@@ -103,7 +113,6 @@ getVideoSources = async (account) => {
       console.log(error);
   }
 }
-getVideoSources(account);
 
 //BRIGHTCOVE OBJECT - POPULATED
 const bcObject = [
@@ -390,4 +399,9 @@ https://javascript.info/array-methods
 https://www.linkedin.com/pulse/javascript-find-object-array-based-objects-property-rafael/
 https://usefulangle.com/post/3/javascript-search-array-of-objects
 https://www.javascripttutorial.net/es6/javascript-array-findindex/
+https://apis.support.brightcove.com/cms/code-samples/cms-api-sample-mrss-generator.html
+https://apis.support.brightcove.com/playback/code-samples/playback-api-sample-mrss-generator.html
+https://apis.support.brightcove.com/cms/code-samples/cms-api-sample-mrss-feed-playlist.html
+https://apis.support.brightcove.com/playback/code-samples/playback-api-sample-jsonmrss-feed-playlist.html
+https://github.com/registerguard/brightcove-cms-api-php-rss
 */
