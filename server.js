@@ -4,33 +4,29 @@ Creates RSS feed for Roku
 CONSTRAINTS
 - Users will schedule videos onto or off of Roku by setting a custom BC tag called Roku to yes. We have to do this because there is no where else to get that info.
   CPAD does not have it and there is no separate scheduling system. Unless everyone agress that all content live on the web sites also goes to Roku...
-- Whave have to make 3 calls to Brightcove to get videos: oauth, cms video, and cms sources. Sources is the only place we can get the video URL.
+- We have have to make 3 calls to Brightcove to get videos: oauth, cms video, and cms sources. Sources is the only place we can get the video URL.
 - We will add videos one at a time to the Roku feed. We have to do this, as opposed to adding series objects, because there is no series or season constructs on BC. 
   Everything is held at the video level. The down side is that it's more difficult to qc objects before adding them. You don't know an object is complete until
   all videos have been added.
 - We can only get max of 100 videos at a time and max of only 1 source at a time.
 - The playback API returns everything we need in a single call (oauth, videos, sources) but we can't use it because it's geo-gated. The AWS server might be anywhere.
-- We can only rertieve 100 videos at a time.
-
-BC FIELDS USED FOR REFORMING JSON (bc:roku)
-Web Distribution strand: seasonNumber
-SortOrder: episodeNumber
-TVOSeries: series description
-TVSeriesName: series name
 
 QUESTIONS/TO DO
-- How to get the series description?
+- Where do we store series thumb, title, short descript, long descript, tags, genres, release data?
+  Available playlist fields are name, description, ref if, id (not editable), last updated (not editable)
 - Search by complete, shedule.starts_at, schedule-ends_at, roku, state
-- We must retrieve 100 videos at a time.
 - How does Roku handle geogating?
 - Do I need to sort the array? Does Roku care?
 - Don't forget captions
 - Error handling, retry on any error, write to log file, write to error file
 - Agenda eps are in segments. Roku has no concept of segments.
-- Do we have to call different accounts?
+- Do we have to call different Brightcove accounts?
 - How does Roku handle publish and kill dates?
-- How does Roku handle geo-gating?
 - API creds should be read only
+
+BRIGHTCOVE PLAYLIST FIELD MAPPING
+- name: Paw Patrol-S1
+- description: This is the description --news, sports, science-- ((space, aliens, reptiles))
 */
 
 const express = require('express');
