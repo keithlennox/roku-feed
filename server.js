@@ -25,14 +25,17 @@ CONSTRAINTS
 - Roku Direct Publisher is only meant for simple feeds, mainly because testing/trouble shooting is very slow. We should only put a few shows up or build an app.
 - Agenda eps are in segments. Roku has no concept of segments.
 - We cannot call different Brightcove accounts in the same Roku channel.
+- Ownership is set at the channel level, NOT the series or video level! Country is set in the Roku channel properties. You also set country at the Roku channel
+  "Channel Store Info" level, but this does not affect where videos play.
+- Pub/kill dates are same for Roku as they are for web sites. These are set in the feed, under Content.
+- Roku Direct Publisher is slow to update which makes it slow to test and trouble shoot.
+- BC URLS expire. We have to ask them to extend.
 
 QUESTIONS
-- How does Roku handle publish and kill dates?
-- How does Roku handle geo-gating?
-- Do I need to sort the array? Does Roku care?
 - The playback API returns everything we need in a single call (oauth, videos, sources), can we use it? Apparently we can't because it's geo-gated. The AWS server might be anywhere.
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 - Do you control what gets into a Roku category using series tags or episode tags?
+- Do I need to sort the array? Does Roku care?
 
 TO DO
 - Search by complete, shedule.starts_at, schedule-ends_at, roku, state
@@ -43,11 +46,17 @@ TO DO
 BRIGHTCOVE PLAYLIST NAME FIELD EXAMPLE
 - ["Paw Patrol", 3, "education, sports, dogs", "education, kids" ]
 
-OPTIONS FOR STORING SERIES INFO
-Brightcove videos: custom fields
-Brightcove playlists: max 100, cannot filter by playable
-Brightcove folders: no series description
-CPAD: programs
+WHERE TO STORE SERIES INFO
+Brightcove video custom fields, 1st ep only: some manual effort by MSOs
+Brightcove playlists: more manual effort by MSOs, max 100 videos so need playlist for every season, cannot search videos by playable
+Brightcove folders: name field only
+CPAD programs: requires more complexity, would still need to call BC for URL and strand
+
+METADATA TYPES
+Roku flag: Brightcove (oauth, CMS videos search)
+Basic series metadata (title, description): CPAD Programs
+Basic video metadata (title, description): CPAD Videos
+URLs: Brightcove (oauth, CMS sources)
 */
 
 const express = require('express');
