@@ -10,7 +10,7 @@ CONSTRAINTS
 - Users will not be able to create playlists or upload series images on their own. We will have to do it for them. This is because the metadata on
   a series will need to contain data for x, y, and z and be in json format. There will be no front end for uploading images and the naming convention
   on images will be very specific.
-- We must store Roku series title, short descript, long descript, tags, genres, release data in the available Brightcove playlist fields.
+- We must store Roku series title, short descript, long descript, tags, genres, release date in the available Brightcove playlist fields.
   Available playlist fields are name (248 chars), description (248 chars), refid, id (not editable), last updated (not editable)
 - Series title and description cannot be that long because they are stored on Brightcove playlists along with tags and genres.
 - Any metadata updates must happen on Brightcove. This is because calling Brightcove and CPAD increases complexity.
@@ -36,6 +36,13 @@ QUESTIONS
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 - Do you control what gets into a Roku category using series tags or episode tags?
 - Do I need to sort the array? Does Roku care?
+- What BC custom fields are needed?
+- What's the proper way to call an async function?
+- How to do error hnadling?
+- How to host jpegs?
+- How to host json?
+- How to deploy?
+- Can we re-purpose existing custom fields?
 
 TO DO
 - Search by complete, shedule.starts_at, schedule-ends_at, roku, state
@@ -43,28 +50,48 @@ TO DO
 - Error handling, retry on any error, write to log file, write to error file.
 - API creds should be read only
 
-BRIGHTCOVE PLAYLIST NAME FIELD EXAMPLE
-- ["Paw Patrol", 3, "education, sports, dogs", "education, kids" ]
-
-WHERE TO STORE SERIES INFO
-Brightcove video custom fields, 1st ep only: some manual effort by MSOs
+WHERE TO STORE SERIES INFO (* indicates chosen options)
+*Brightcove video custom fields, 1st ep only: some manual effort by MSOs
 Brightcove playlists: more manual effort by MSOs, max 100 videos so need playlist for every season, cannot search videos by playable
 Brightcove folders: name field only
 CPAD programs: requires more complexity, would still need to call BC for URL and strand
 
-METADATA TYPES
-Roku flag: Brightcove (oauth, CMS videos search)
-Basic series metadata (title, description): CPAD Programs
-Basic video metadata (title, description): CPAD Videos
-URLs: Brightcove (oauth, CMS sources)
+BC CUSTOM FIELDS
+- TVOSeriesName (already exists): 1st ep only
+- seriesDescription (new): 1st ep only
+- seriesKeywords (new): 1st ep only
+- seriesGenres (new): 1st ep only
+- seriesReleaseDate (new): 1st ep only
+- seasonNumber (new): all eps, pull from TS XML "SeasonNumber"
+- episodeNumber (new): all eps, pull from TS XML "EPISODE_ORDER"
+
+BC API FUNCTIONS
+- getToken
+- getCount
+- getVideos
+- getSources
+
+CRON.JS (how to grab series metadata?)
+- cron job
+  - getCount
+  - Loop until count reached
+    - getVideos (100) / add to temp array
+  - Loop thru temp array
+    - getSources / add to temp array
+  - Sort temp array by series / season / ep
+  - Loop thru temp array
+    - Move videos to Roku object
+  - Write object to json file
+
+SERVER.JS
+- recieve API call
+- ingest json file
+- send json in response
 */
 
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-
-//Set vars
-const account = "18140038001";
 
 //Express server
 const app = express();
@@ -72,156 +99,10 @@ app.use(cors());
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.get('/', (req, res) => {
-  getVideoCount(account);
-  getVideos(account);
-  getVideoSources(account);
   res.send('Hello World!');
+  //Ingest json file and return roku json object
 });
 app.listen(3000);
-
-//GET BRIGHTCOVE TOKEN (This will need to check for expiry)
-const getBCToken = async () => {
-const client_id = "2a703469-6009-4204-bcb3-ba3cec61abf5";
-const client_secret = "4munZY-rUvfs-SnoaMXkkywC_z9Li5fViX_GGOz2k9A-IwkOhEksFiGsdG88g_1JmuYd_60Tvk5wf48Cdvv52g";
-var auth_string = new Buffer(client_id + ":" + client_secret).toString('base64');
-const oauth_body = "grant_type=client_credentials";
-const oauth_options = {
-  headers: {
-    'Authorization': 'Basic ' + auth_string,
-    'Content-Type': 'application/x-www-form-urlencoded'
-  }
-}
-try {
-  let oauth_result = await axios.post("https://oauth.brightcove.com/v3/access_token", oauth_body, oauth_options)
-  let options = {
-    headers: {
-      'Authorization': 'Bearer ' + oauth_result.data.access_token,
-      'Content-type' : 'application/json'
-    }
-  }
-  console.log(options);
-return options;
-}catch(error){
-  console.log(error);
-}
-}
-
-//GET TOTAL NUMBER OF VIDEOS
-getVideoCount = async (account) => {
-  try {
-      let options = await getBCToken(); //Get token
-      let cms_count_result = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/counts/videos?q=tags:roku", options)
-      console.log(JSON.stringify(cms_count_result.data));
-  }catch(error){
-      console.log(error);
-  }
-}
-
-//GET VIDEOS
-//Add Looping code (100 videos at a time)
-getVideos = async (account) => {
-  try {
-      let options = await getBCToken(); //Get token
-      let cms_result = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?q=tags:roku", options)
-      console.log(JSON.stringify(cms_result.data));
-  }catch(error){
-      console.log(error);
-  }
-}
-
-//GET VIDEO SOURCES
-getVideoSources = async (account) => {
-  try {
-      let options = await getBCToken(); //Get token
-      let cms_sources_result = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos/6231365655001/sources", options)
-      console.log(JSON.stringify(cms_sources_result.data));
-  }catch(error){
-      console.log(error);
-  }
-}
-
-//BRIGHTCOVE OBJECT - POPULATED
-const bcObject = [
-  {
-    "series": "Paw Patrol",
-    "season": "1",
-    "episode": "2",
-    "reference_id": "123456",
-    "name": "Pups save the day"
-  },
-  {
-    "series": "Kratts",
-    "season": "2",
-    "episode": "11",
-    "reference_id": "654321",
-    "name": "Lions"
-  },
-  {
-    "series": "Paw Patrol",
-    "season": "1",
-    "episode": "1",
-    "reference_id": "234567",
-    "name": "Pups go to Hollywood"
-  },
-  {
-    "series": "Kratts",
-    "season": "1",
-    "episode": "7",
-    "reference_id": "4500889",
-    "name": "Tigers"
-  },
-  {
-    "series": "Kratts",
-    "season": "2",
-    "episode": "4",
-    "reference_id": "654045",
-    "name": "Lions"
-  },
-  { 
-    "series": "Paw Patrol",
-    "season": "1",
-    "episode": "17",
-    "reference_id": "234567",
-    "name": "Pups go on holiday"
-  },
-  {
-    "series": "Kratts",
-    "season": "2",
-    "episode": "3",
-    "reference_id": "789443",
-    "name": "Armadillos"
-  },
-  {
-    "series": "Kratts",
-    "season": "1",
-    "episode": "2",
-    "reference_id": "225478",
-    "name": "Wolves"
-  }
-];
-
-//CREATE ROKU KEED
-let rokuFeed = { //Create Roku feed
-    "providerName": "TVO", 
-    "language": "en-US", 
-    series: []
-}
-
-//POPULATE ROKU FEED
-bcObject.forEach((bcItem) => { //Loop thru brightcove videos
-    let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.series) //Get the series index from the Roku series array, if it exists
-    if(rokuSeriesIndex === -1) { //If the BC series does not exist in the Roku series array
-        rokuFeed.series.splice(rokuSeriesIndex, 0, {"title": bcItem.series, "seasons":[{"seasonNumber": bcItem.season, "episodes": [{"title": bcItem.name, "episode": bcItem.episode}]}]}); //Push BC series to Rocku series array
-    }else{ //If the BC series does exist in the Roku series array
-        let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber === bcItem.season) //Get the season index from the Roku seasons array, if it exists
-        if(rokuSeasonIndex === -1) { //If the BC season does not exist in the Roku season array
-            rokuFeed.series[rokuSeriesIndex].seasons.splice(rokuSeriesIndex, 0,{"seasonNumber": bcItem.season, "episodes": [{"title": bcItem.name, "episode": bcItem.episode}]});//Push the BC season and episode to the seasons array
-        }else{ //If the BC season does exist in the Roku season array
-            rokuFeed.series[rokuSeriesIndex].seasons[rokuSeasonIndex].episodes.splice(bcItem.episode, 0, {"title": bcItem.name, "episode": bcItem.episode}); //Push the BC episode to the existing Roku season in the Roku seasons array
-        }
-    }
-})
-console.log(JSON.stringify(rokuFeed));
 
 /*
 CMS API ENDPOINTS
