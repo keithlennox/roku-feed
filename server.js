@@ -1,32 +1,53 @@
 /*
 Creates RSS feed for Roku
 
-CONSTRAINTS
-- Users will schedule videos onto or off of Roku by setting a custom BC tag called Roku to yes. We have to do this because there is no where else to get that info.
-  CPAD does not have it and there is no separate scheduling system. Unless everyone agress that all content live on the web sites also goes to Roku...
-- We have have to make 3 calls to Brightcove to get videos: oauth, cms video, and cms sources. Sources is the only place we can get the video URL.
-- We will add videos one at a time to the Roku feed. We have to do this, as opposed to adding series objects, because there is no series or season constructs on BC. 
-  Everything is held at the video level. The down side is that it's more difficult to qc objects before adding them. You don't know an object is complete until
-  all videos have been added.
-- We can only get max of 100 videos at a time and max of only 1 source at a time.
-- The playback API returns everything we need in a single call (oauth, videos, sources) but we can't use it because it's geo-gated. The AWS server might be anywhere.
+EXPLANATION
+- Videos are hosted on Brightcove within playlists
+- Playlists are tagged with keyword Roku
 
-QUESTIONS/TO DO
-- Where do we store series thumb, title, short descript, long descript, tags, genres, release data?
-  Available playlist fields are name, description, ref if, id (not editable), last updated (not editable)
-- Search by complete, shedule.starts_at, schedule-ends_at, roku, state
-- How does Roku handle geogating?
-- Do I need to sort the array? Does Roku care?
-- Don't forget captions
-- Error handling, retry on any error, write to log file, write to error file
+CONSTRAINTS
+- Users will schedule (CMS) videos on Roku by placing them in playlists. Not all content in CPAD can go on Roku and CPAD does not have a Roku flag.
+- Users will not be able to create playlists or upload series images on their own. We will have to do it for them. This is because the metadata on
+  a series will need to contain data for x, y, and z and be in json format. There will be no front end for uploading images and the naming convention
+  on images will be very specific.
+- We must store Roku series title, short descript, long descript, tags, genres, release data in the available Brightcove playlist fields.
+  Available playlist fields are name (248 chars), description (248 chars), refid, id (not editable), last updated (not editable)
+- Series title and description cannot be that long because they are stored on Brightcove playlists along with tags and genres.
+- Any metadata updates must happen on Brightcove. This is because calling Brightcove and CPAD increases complexity.
+- We have to make numerous calls to Brightcove: oauth, cms playlists, cms videos, and cms sources. Sources is the only place we can get the video URL.
+  This increases the amount of coding and error handling.
+- We can only get max of 100 videos at a time and max of only 1 source at a time. This increases the comlexity and the duration it takes to refresh the feed.
+- We will need a CRON. This will increase the amount of coding. Brightcove calls can't be triggered by Roku because Roku will time out waiting for
+  the calls to finsih. We will need to run a cron job and cache the feed in a json file.
+- Roku requires still images for series. They will need to be stored on the node.js server. This increaes the complexity.
+- Brightcove URLs expire. We will have to ask them to extend the expiry time/
+- We may need to add Brightcove custom fields... TBD.
+- Roku Direct Publisher is only meant for simple feeds, mainly because testing/trouble shooting is very slow. We should only put a few shows up or build an app.
 - Agenda eps are in segments. Roku has no concept of segments.
-- Do we have to call different Brightcove accounts?
+- We cannot call different Brightcove accounts in the same Roku channel.
+
+QUESTIONS
 - How does Roku handle publish and kill dates?
+- How does Roku handle geo-gating?
+- Do I need to sort the array? Does Roku care?
+- The playback API returns everything we need in a single call (oauth, videos, sources), can we use it? Apparently we can't because it's geo-gated. The AWS server might be anywhere.
+- Roku's sample feed does not adhere to their spec doc. Which is correct?
+- Do you control what gets into a Roku category using series tags or episode tags?
+
+TO DO
+- Search by complete, shedule.starts_at, schedule-ends_at, roku, state
+- Don't forget captions.
+- Error handling, retry on any error, write to log file, write to error file.
 - API creds should be read only
 
-BRIGHTCOVE PLAYLIST FIELD MAPPING
-- name: Paw Patrol-S1
-- description: This is the description --news, sports, science-- ((space, aliens, reptiles))
+BRIGHTCOVE PLAYLIST NAME FIELD EXAMPLE
+- ["Paw Patrol", 3, "education, sports, dogs", "education, kids" ]
+
+OPTIONS FOR STORING SERIES INFO
+Brightcove videos: custom fields
+Brightcove playlists: max 100, cannot filter by playable
+Brightcove folders: no series description
+CPAD: programs
 */
 
 const express = require('express');
@@ -193,11 +214,7 @@ bcObject.forEach((bcItem) => { //Loop thru brightcove videos
 })
 console.log(JSON.stringify(rokuFeed));
 
-
-// REFERENCE /////////////////////////// REFERENCE //////////////////////////// REFERENCE //////////////////////// REFERENCE //
-
-/*API ENPOINTS
-
+/*
 CMS API ENDPOINTS
 - Get Videos: can use search terms, does not include sources
 - Get Video Sources: contains URLs, requires id or refid, cannot use search terms
@@ -214,115 +231,8 @@ PLAYBACK API ENDPOINTS
 - Get videos: includes sources
 - Get playlist by id
 - Static URLs
-*/
 
-/*OPTIONS FOR ORGANIZING CONTENT
-Videos: 
-Playlists: max 100, cannot filter by playable
-Folders: no series description
-CPAD: more API calls
-*/
-
-/*OPTIONS FOR RESHAPING JSON
-- node.js / json / javascript methods
-- node.js / json / npm package
-- node.js / json / npm xslt package (saxon)
-- php
-*/
-
-/*OPTIONS FOR GETTING CONTENT + RE-MAPPING JSON
-
-OPTION 1
-- Call BC to get 100 videos that match search=roku
-- Loop thru results and call again to get sources for each video
-- Create video object
-- Insert video into season object
-- Call BC for next 100
-
-OPTION 2
-Is there a way to build the objects first, before adding them to the Roku object.
-*/
-
-/*ROKU OBJECT - EMPTY
-const unFlatObjectA = {
-	"series": [
-        {
-            "seasons": [
-                {
-                    "episodes": [
-                        {},
-                        {},
-                        {}
-                    ]
-                },
-                {
-                    "episodes": [
-                        {},
-                        {},
-                        {}
-                    ]
-                }
-            ]
-	    },
-        {
-            "seasons": [
-                {
-                    "episodes": [
-                        {},
-                        {},
-                        {}
-                    ]
-                },
-                {
-                    "episodes": [
-                        {},
-                        {},
-                        {}
-                    ]
-                }
-            ]
-	    }
-    ]
-} */
-
-/*ROKU OBJECT - POPULATED
-const unFlatObjectB = {
-	"providerName": "Roku Developers",
-	"language": "en-US",
-	"series": [
-        {
-            "id": "series_2_RSG",
-            "title": "Hello",
-            "seasons": [
-                {
-                    "seasonNumber": "1",
-                    "episodes": [
-                        {
-                            "id": "series-rsg_unit1_intro",
-                            "title": "Introduction to the course",
-                            "episodeNumber": 1,
-                        },
-                        {
-                            "id": "series-rsg-unit2-developerSetup",
-                            "title": "Development setup",
-                            "episodeNumber": 2,
-                        },
-                        {
-                            "id": "series-video3-scenegraph-overview",
-                            "title": "Core concepts",
-                            "episodeNumber": 3,
-                        }
-                    ]
-
-                }
-            ]
-	    }
-    ]
-} */
-
-/*CODE SNIPPETS
-
-ARRAY LOOPING FUNCTIONS
+POTENTIALLY USEFULL FUNCTIONS
 - Array.indexOf/lastIndexOf(item, pos) – look for item starting from position pos, return the index or -1 if not found.
 - Array.includes(value) – returns true if the array has value, otherwise false.
 - Array.find/filter(func) – filter elements through the function, return first/all values that make it return true.
@@ -334,49 +244,14 @@ ARRAY LOOPING FUNCTIONS
 - Array.values() - returns a new Array Iterator object that contains the values for each index in the array.
 - Array.some() - at least one element in the array passes the test implemented by the provided function. It returns a Boolean value.
 - Array.every() - all elements in the array pass the test implemented by the provided function. It returns a Boolean value.
-
-OTHER ARRAY FUNCTION
-Array.push(...items) – adds items to the end,
-Array.isArray(arr) - checks arr for being an array.
-
-OTHER FUNCTIONS
+- Array.push(...items) – adds items to the end,
+- Array.isArray(arr) - checks arr for being an array.
 - for: repeats until a specified condition evaluates to false.
 - for in: iterates a specified variable over all the enumerable properties of an object. 
 - for of: 
 - while: executes its statements as long as a specified condition evaluates to true. 
 - do while: repeats until a specified condition evaluates to false.
-
-OBJECT FUNCTIONS
 - assign
-
-FINDINDEX: Returns the index of the first element in an array that pass a test
-array.findIndex(function(currentValue, index, arr), thisValue)
- let a = bcObject.findIndex((item, index) => item.series === "Brady Bunch")
- console.log(a);
-
-FIND: Returns the value of the first element in an array that pass a test
-array.find(function(currentValue, index, arr),thisValue)
-let b = flatObject.find((item, index) => item.series === "Brady Bunch")
-console.log(b);
-
-FOREACH: Calls a function for each array element
-array.forEach(function(currentValue, index, arr), thisValue)
-let c = flatObject.forEach((item, index) => {
-    if(item.series === "Brady Bunch") {
-        console.log(index);
-    }
-/})
-
-SOME: Checks if any of the elements in an array pass a test
-array.some(function(currentValue, index, arr), thisValue)
-let d = flatObject.some((item, index) => item.series === "Brady Bunch")
-console.log(d);
-
-EVERY: Checks if all elements in an array pass a test
-array.every(function(currentValue, index, arr), thisValue)
-let e = flatObject.every((item, index) => item.series === "Brady Bunch")
-console.log(e);
-*/
 
 /*RESOURCES
 https://www.robinwieruch.de/javascript-map-array
