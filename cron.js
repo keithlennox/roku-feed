@@ -1,11 +1,24 @@
 //Set vars
 const account = "18140038001";
 
-//CRON job - trigger these functions
-    //getCount(account);
-    //getVideos(account);
-    //getSources(account);
-    //createRokuObject(tempArray);
+//CRON
+cron.schedule('* * * * *', async () => {
+    
+    console.log('CRON TRIGGERED ' + new Date())
+
+    //
+    let count = await getCount(account);
+
+    //
+    let videos = await getVideos(account, count);
+
+    //
+    let videos2 = getSources(account, videos);
+
+    //
+    createRokuFeed(tempArray);
+
+})
 
 //GET BRIGHTCOVE TOKEN (This will need to check for expiry)
 const getToken = async () => {

@@ -43,14 +43,15 @@ QUESTIONS
 - How to host json?
 - How to deploy?
 - Can we re-purpose existing custom fields?
+- Use async/awat or not? See below.
 
 TO DO
 - Search by complete, shedule.starts_at, schedule-ends_at, roku, state
 - Don't forget captions.
-- Error handling, retry on any error, write to log file, write to error file.
+- Error handling. See below.
 - API creds should be read only
 
-WHERE TO STORE SERIES INFO (* indicates chosen options)
+WHERE TO STORE SERIES INFO (* indicates chosen option)
 *Brightcove video custom fields, 1st ep only: some manual effort by MSOs
 Brightcove playlists: more manual effort by MSOs, max 100 videos so need playlist for every season, cannot search videos by playable
 Brightcove folders: name field only
@@ -72,21 +73,43 @@ BC API FUNCTIONS
 - getSources
 
 CRON.JS (how to grab series metadata?)
-- cron job
-  - getCount
-  - Loop until count reached
-    - getVideos (100) / add to temp array
-  - Loop thru temp array
-    - getSources / add to temp array
-  - Sort temp array by series / season / ep
-  - Loop thru temp array
-    - Move videos to Roku object
-  - Write object to json file
+-Get token
+  -If token fails
+    -
+  -If token succeeds
+    - Get count
+      -If count fails (non 200 returned, error tag returned, count tag not returned)
+        -
+      -If count succeeds (200 returned, error tag not returned, count tag returned)
+        -Get videos
+          -If videos fail (non 200 returned, error tag returned, id tag not returned)
+            -
+          -If videos succeeds (200 returned, error tag not returned, id tag returned)
+            -Get sources
+              -If sources fails (non 200 returned, error tag returned, x tag not returned)
+                -
+              -If sources succeeds (200 returned, error tag not returned, x tag returned)
+                -Create roku feed
+                  -If roku fails (???)
+                    -
+                  -If roku succeeds (???)
+                    -Write feed to file
 
 SERVER.JS
 - recieve API call
 - ingest json file
 - send json in response
+
+ASYNC
+- PHP automatically waits for async operations. Developer does not have to worry about it.
+- PHP never triggers itself. Javascript is triggering itself with the CRON.
+- CRON triggers...
+
+ERROR HANDLING
+- Check API response, retry 3x on any error, log error.
+- Catch error, log errors
+- Send email?
+- Does try / catch catch REST errors? Need to test.
 */
 
 const express = require('express');
@@ -165,4 +188,5 @@ https://apis.support.brightcove.com/playback/code-samples/playback-api-sample-mr
 https://apis.support.brightcove.com/cms/code-samples/cms-api-sample-mrss-feed-playlist.html
 https://apis.support.brightcove.com/playback/code-samples/playback-api-sample-jsonmrss-feed-playlist.html
 https://github.com/registerguard/brightcove-cms-api-php-rss
+https://www.toptal.com/nodejs/node-js-error-handling
 */
