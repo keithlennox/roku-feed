@@ -1,0 +1,98 @@
+[
+    {
+        "series": "Paw Patrol",
+        "season": "1",
+        "episode": "2",
+        "reference_id": "123456",
+        "name": "Pups save the day",
+        "custom_fields": {
+            "tvoseriescontenttype": "series",
+            "tvoseriesreleasedate": "2021-02-08T21:57:28.367Z",
+            "tvoseriesname": "A Desert Between Us and Them",
+            "tvoseriesdescription": "A Desert Between Us and Them",
+            "tvoseriestags": "science, art, nature",
+            "tvoseriesgenres": "Education",
+            "syndicationflag": "Yes",
+            "seasonNumber": "1",
+            "episodeNumber": "1"
+        },
+        "video_url": "https://secure.brightcove.com/services/mobile/streaming/index/master.m3u8?videoId=4909957179001&pubId=18140038001&secure=true",
+        "images": {
+            "thumbnail": {
+                "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/jit/18140038001/a3bdf0b6-0267-4b3f-8a1b-1a72c990b6ba/main/160x90/16m34s645ms/match/image.jpg"
+            }
+        },
+        "schedule": {
+            "ends_at": "2099-02-05T13:09:45.000Z",
+            "starts_at": "2021-02-08T23:30:00.000Z"
+        },
+        "tags": ["gamestop", "reddit", "stock market and social media"],
+        "text_tracks": [{
+            "id": "569d83b4-c746-48c9-9acd-144b82e08bb4",
+            "account_id": "18140038001",
+            "src": "http://bcbolt446c5271-a.akamaihd.net/media/v1/text/vtt/clear/18140038001/a3bdf0b6-0267-4b3f-8a1b-1a72c990b6ba/569d83b4-c746-48c9-9acd-144b82e08bb4/text.vtt?akamai_token=exp=1612989110~acl=/media/v1/text/vtt/clear/18140038001/a3bdf0b6-0267-4b3f-8a1b-1a72c990b6ba/569d83b4-c746-48c9-9acd-144b82e08bb4/text.vtt*~hmac=02ac5a4864fb536fbae6df11bb0d7d4981e2bfd82d77e93c68a3f38ad8a28912",
+            "srclang": "en",
+            "label": "English",
+            "kind": "captions",
+            "mime_type": "text/webvtt",
+            "asset_id": null,
+            "sources": [{
+                    "src": "http://bcbolt446c5271-a.akamaihd.net/media/v1/text/vtt/clear/18140038001/a3bdf0b6-0267-4b3f-8a1b-1a72c990b6ba/569d83b4-c746-48c9-9acd-144b82e08bb4/text.vtt?akamai_token=exp=1612989110~acl=/media/v1/text/vtt/clear/18140038001/a3bdf0b6-0267-4b3f-8a1b-1a72c990b6ba/569d83b4-c746-48c9-9acd-144b82e08bb4/text.vtt*~hmac=02ac5a4864fb536fbae6df11bb0d7d4981e2bfd82d77e93c68a3f38ad8a28912"
+                }, {
+                    "src": "https://bcbolt446c5271-a.akamaihd.net/media/v1/text/vtt/clear/18140038001/a3bdf0b6-0267-4b3f-8a1b-1a72c990b6ba/569d83b4-c746-48c9-9acd-144b82e08bb4/text.vtt?akamai_token=exp=1612989110~acl=/media/v1/text/vtt/clear/18140038001/a3bdf0b6-0267-4b3f-8a1b-1a72c990b6ba/569d83b4-c746-48c9-9acd-144b82e08bb4/text.vtt*~hmac=02ac5a4864fb536fbae6df11bb0d7d4981e2bfd82d77e93c68a3f38ad8a28912"
+                }
+            ],
+            "in_band_metadata_track_dispatch_type": "",
+            "default": false
+        }]
+    },
+    {
+        "series": "Kratts",
+        "season": "2",
+        "episode": "11",
+        "reference_id": "654321",
+        "name": "Lions"
+    },
+    {
+        "series": "Paw Patrol",
+        "season": "1",
+        "episode": "1",
+        "reference_id": "234567",
+        "name": "Pups go to Hollywood"
+    },
+    {
+        "series": "Kratts",
+        "season": "1",
+        "episode": "7",
+        "reference_id": "4500889",
+        "name": "Tigers"
+    },
+    {
+        "series": "Kratts",
+        "season": "2",
+        "episode": "4",
+        "reference_id": "654045",
+        "name": "Lions"
+    },
+    {
+        "series": "Paw Patrol",
+        "season": "1",
+        "episode": "17",
+        "reference_id": "234567",
+        "name": "Pups go on holiday"
+    },
+    {
+        "series": "Kratts",
+        "season": "2",
+        "episode": "3",
+        "reference_id": "789443",
+        "name": "Armadillos"
+    },
+    {
+        "series": "Kratts",
+        "season": "1",
+        "episode": "2",
+        "reference_id": "225478",
+        "name": "Wolves"
+    }
+]

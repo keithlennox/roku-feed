@@ -8,34 +8,35 @@ Videos are hosted on Brightcove...
 
 ### CONSTRAINTS
 
-- Users will schedule (CMS) videos on Roku by placing them in playlists. Not all content in CPAD can go on Roku and CPAD does not have a Roku flag.  
-- Users will not be able to create playlists or upload series images on their own. We will have to do it for them. This is because the metadata on
-  a series will need to contain data for x, y, and z and be in json format. There will be no front end for uploading images and the naming convention
-  on images will be very specific.  
-- We must store Roku series title, short descript, long descript, tags, genres, release date in the available Brightcove playlist fields.
-  Available playlist fields are name (248 chars), description (248 chars), refid, id (not editable), last updated (not editable)  
-- Series title and description cannot be that long because they are stored on Brightcove playlists along with tags and genres.  
-- Any metadata updates must happen on Brightcove. This is because calling Brightcove and CPAD increases complexity.  
-- We have to make numerous calls to Brightcove: oauth, cms playlists, cms videos, and cms sources. Sources is the only place we can get the video URL.
-  This increases the amount of coding and error handling.  
-- We can only get max of 100 videos at a time and max of only 1 source at a time. This increases the comlexity and the duration it takes to refresh the feed.  
-- We will need a CRON. This will increase the amount of coding. Brightcove calls can't be triggered by Roku because Roku will time out waiting for
-  the calls to finsih. We will need to run a cron job and cache the feed in a json file.  
-- Roku requires still images for series. They will need to be stored on the node.js server. This increaes the complexity.  
-- Brightcove URLs expire. We will have to ask them to extend the expiry time.  
-- We may need to add Brightcove custom fields... TBD.  
-- Roku Direct Publisher is only meant for simple feeds, mainly because testing/trouble shooting is very slow. We should only put a few shows up or build an app.  
-- Agenda eps are in segments. Roku has no concept of segments.  
-- We cannot call different Brightcove accounts in the same Roku channel.  
-- Ownership is set at the channel level, NOT the series or video level! Country is set in the Roku channel properties. You also set country at the Roku channel
-  "Channel Store Info" level, but this does not affect where videos play.  
+- Users will schedule (CMS) videos on Roku by changing a value in a custom tag. Not all content in CPAD can go on Roku and CPAD does not have a Roku flag.
+- We must store Roku series title, short descript, long descript, tags, genres, release date in Brightcove custom fields.
+- Any metadata must come from Brightcove. This is because calling Brightcove and CPAD increases complexity.
+- We have to make numerous calls to Brightcove: oauth, videos, and sources. Sources is the only place we can get the video URL.
+- We can only get max of 100 videos at a time and max of only 1 source at a time.
+- We will need to cache the feed in a json file. Brightcove calls can't be triggered by Roku because Roku will time out waiting for the calls to finsih.
+- Roku requires still images for series. They will need to be stored on the node.js server.
+- Users will not be able to upload series images on their own. We will have to do it for them. This is because there will be no front end for uploading images.
+- Brightcove URLs expire. We will have to ask them to extend the expiry time.
+- Agenda eps are in segments. Roku has no concept of segments.
+- We will need to call different Brightcove accounts in the same Roku channel.
+- Ownership is set at the channel level, NOT the series or video level!
 - Pub/kill dates are same for Roku as they are for web sites. These are set in the feed, under Content.  
-- Roku Direct Publisher is slow to update which makes it slow to test and trouble shoot.  
-- BC URLS expire. We have to ask them to extend.  
+- Roku Direct Publisher is slow to update which makes it slow to test and trouble shoot.
+- We cannot use the BC Playback API, which is simpler. See below.
+- forEach does not work with async/await. Use for...of instead.
+
+### PLAYBACK API CONSTRAINTS
+- The playback API returns everything in a single call (oauth, videos, sources).
+- The Playback API is faster.
+- But we cannot use it due to the following constraints.
+- Results are geo-restricted. The AWS server might be anywhere.
+- Search returns max of 1000 videos.
+- Reference: apis.support.brightcove.com/playback/references/reference_v2.html
+- Reference: apis.support.brightcove.com/cms/searching/cmsplayback-api-videos-search.html
+- Reference: apis.support.brightcove.com/cms/searching/cmsplayback-api-videos-search.html
 
 ### QUESTIONS
 
-- The playback API returns everything we need in a single call (oauth, videos, sources), can we use it? Apparently we can't because it's geo-gated. The AWS server might be anywhere.  
 - Roku's sample feed does not adhere to their spec doc. Which is correct?  
 - Do you control what gets into a Roku category using series tags or episode tags?  
 - Do I need to sort the array? Does Roku care?  
