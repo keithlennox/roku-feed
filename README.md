@@ -48,13 +48,6 @@ Videos are hosted on Brightcove...
 - Roku's sample feed does not adhere to their spec doc. Which is correct?  
 - Do you control what gets into a Roku category using series tags or episode tags?  
 - Do I need to sort the array? Does Roku care?  
-- What BC custom fields are needed?  
-- What's the proper way to call an async function?  
-- How to do error hnadling?  
-- How to host jpegs?  
-- How to host json?  
-- How to deploy?  
-- Can we re-purpose existing custom fields?  
 
 ### TO DO
 
