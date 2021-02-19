@@ -1,52 +1,53 @@
 const axios = require('axios');
 const url = require('url');
-const bcObject = require('./bc-data.json')
+const bcObject = require('./reference/bc-data.json')
+var fs = require('fs');
+const cron = require('node-cron');
 
 //Set vars
 const account = "18140038001";
 
-//CRON
-/* cron.schedule('* * * * *', async () => {
-    console.log('CRON TRIGGERED ' + new Date())
-    createFeed(account);
-}) */
-
-//CREATE ROKU FEED (TO DO: more robust error handling + rate limiting)
+//CREATE ROKU FEED
+//TO DO: error handling, logging, re-tries, rate limiting, handle multiple bc accounts, filter for playable videos, handle multiple content types
 createFeed = async (account) => {
     try {
 
         //Get token
         let options = await getToken();
         let count = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/counts/videos?q=tags:history", options);
-        //console.log(JSON.stringify(count.data.count));
+        console.log("Search found " + count.data.count + " videos");
 
         //Get videos
         let counter = 0; //initialize counter
         let videos_array = []; //Create empty videos array
         while(counter <= count.data.count) { //Get next 100 videos
-            let videos = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?q=tags:history&limit=100&offset=" + counter, options);
-            for(let item of videos.data) { //Push each found video to videos_array
-              videos_array.push(item); 
-              console.log(item.id);
-            };
-            console.log(counter);
-            counter = counter + 100; //Increment counter
+          console.log("Retrieving next 100 videos");
+          let videos = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?q=tags:history&limit=100&offset=" + counter, options);
+          for(let item of videos.data) { //Push each found video to videos_array
+            videos_array.push(item); 
+            console.log(item.id);
+          };
+          counter = counter + 100; //Increment counter
         }
 
         //Get sources
+        console.log("Retrieving sources");
         for(let videoItem of videos_array) { //For each video...
           let sources = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos/" + videoItem.id + "/sources", options) //Get the sorces array
           for(let sourceItem of sources.data) { //For each sources array...
             if(sourceItem.src && sourceItem.src.startsWith("https://") && sourceItem.type === "application/x-mpegURL") { //Get the HLS source
-              console.log(sourceItem.src);
               videoItem.video_url = sourceItem.src; //Add the HLS source url to the videos_array
+              console.log(sourceItem.src);
             }
           }
           await sleep(111); //Brightcove rate limiting = less than 10 requests per second (111 ms = 9 requests per second)
         };
-        console.log(videos_array);
-        
-        //Create Roku feed
+        //console.log(videos_array);
+
+        //Sort the videos_array by series name, season, episode
+        //Code TBD
+
+        //Create Roku feed (TO DO: add series metadata including thumnbnail)
         let rokuFeed = {
           "providerName": "TVO", 
           "language": "en-US", 
@@ -66,15 +67,19 @@ createFeed = async (account) => {
           }
         })
         console.log(JSON.stringify(rokuFeed));
-        //Write feed to json file
+
+        //Write Roku feed to file
+        fs.writeFile('./feed.json', JSON.stringify(rokuFeed), (err) => {
+          if (err) throw err;
+        });
 
     }catch(error){
         console.log(error);
     }
 }
 
-//SLEEP FUNCTION (must work with async/await)
-//sitepoint.com/delay-sleep-pause-wait/
+//SLEEP FUNCTION (works with async/await)
+//sitepoint.com/delay-sleep-pause-wait
 //coreycleary.me/why-does-async-await-in-a-foreach-not-actually-await
 const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -100,11 +105,17 @@ const getToken = async () => {
           'Content-type' : 'application/json'
         }
       }
-      console.log(options);
-    return options;
+      //console.log(options);
+      console.log("Retrieving token")
+      return options;
     }catch(error){
       console.log(error);
     }
 }
 
+//CRON
 createFeed(account);
+cron.schedule('*/10 * * * *', () => {
+    console.log('CRON TRIGGERED ' + new Date())
+    createFeed(account);
+})

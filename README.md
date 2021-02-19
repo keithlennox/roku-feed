@@ -51,9 +51,18 @@ Videos are hosted on Brightcove...
 ### TO DO
 
 - Search by complete, shedule.starts_at, schedule-ends_at, roku, state  
-- Don't forget captions.  
-- Error handling. See below.  
-- API creds should be read only  
+- Captions.  
+- Error handling.
+- BC CMS API creds should be read only  
+- Logging
+- Re-tries
+- Rate limiting
+- Handle multiple bc accounts
+- Handle multiple content types
+- Add series metadata to roku feed, pulling from ep 1 video only
+- Upload series image files and serve them
+- Add and populate BC custom fields
+- Map all bc fields to Roku feed
 
 ### WHERE TO STORE SERIES INFO (* indicates chosen option)
 
