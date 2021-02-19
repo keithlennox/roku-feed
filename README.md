@@ -13,27 +13,35 @@ Videos are hosted on Brightcove...
 - Any metadata must come from Brightcove. This is because calling Brightcove and CPAD increases complexity.
 - We have to make numerous calls to Brightcove: oauth, videos, and sources. Sources is the only place we can get the video URL.
 - We can only get max of 100 videos at a time and max of only 1 source at a time.
-- We will need to cache the feed in a json file. Brightcove calls can't be triggered by Roku because Roku will time out waiting for the calls to finsih.
-- Roku requires still images for series. They will need to be stored on the node.js server.
+- We will need to cache the feed in a json file. Brightcove calls can't be triggered by Roku because Roku will time out waiting for the calls to finish.
+- Roku requires still images for series. They will need to be stored on the node.js server or they may already exist on TVO server.
 - Users will not be able to upload series images on their own. We will have to do it for them. This is because there will be no front end for uploading images.
-- Brightcove URLs expire. We will have to ask them to extend the expiry time.
+- Brightcove URLs expire. We will have to ask them to extend the expiry time. Or have a proxy inbewteen roku feed and brightcove.
 - Agenda eps are in segments. Roku has no concept of segments.
 - We will need to call different Brightcove accounts in the same Roku channel.
 - Ownership is set at the channel level, NOT the series or video level!
 - Pub/kill dates are same for Roku as they are for web sites. These are set in the feed, under Content.  
 - Roku Direct Publisher is slow to update which makes it slow to test and trouble shoot.
-- We cannot use the BC Playback API, which is simpler. See below.
+- We cannot use the BC Playback API, which is simpler. See constraints below.
+- We cannot use the BC Social Syndication API, which is much simpler. See contstraints below.
 - forEach does not work with async/await. Use for...of instead.
 
 ### PLAYBACK API CONSTRAINTS
+
 - The playback API returns everything in a single call (oauth, videos, sources).
 - The Playback API is faster.
 - But we cannot use it due to the following constraints.
-- Results are geo-restricted. The AWS server might be anywhere.
+- Results are geo-restricted (may be able to locate AWS server in Canadian region)
 - Search returns max of 1000 videos.
 - Reference: apis.support.brightcove.com/playback/references/reference_v2.html
 - Reference: apis.support.brightcove.com/cms/searching/cmsplayback-api-videos-search.html
 - Reference: apis.support.brightcove.com/cms/searching/cmsplayback-api-videos-search.html
+
+### SOCIAL SYNDICATION CONSTRAITS
+
+- Returns only 100 videos (need to confirm)
+- Nowhere to host series images (may not be a showstopper)
+- Liquid not capable of creating nested series, seasons, episodes (need to conmfirm)
 
 ### QUESTIONS
 
