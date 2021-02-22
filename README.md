@@ -24,6 +24,7 @@ Videos are hosted on Brightcove...
 - Roku Direct Publisher is slow to update which makes it slow to test and trouble shoot.
 - We cannot use the BC Playback API, which is simpler. See constraints below.
 - We cannot use the BC Social Syndication API, which is much simpler. See contstraints below.
+- There is ZERO feed validation happening. Whatever is set on BC will go into the feed as is.
 
 ### PLAYBACK API CONSTRAINTS
 
