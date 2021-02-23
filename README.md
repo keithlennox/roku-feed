@@ -6,7 +6,7 @@ Creates Direct Publisher json feed for Roku
 
 Videos are hosted on Brightcove...
 
-### CONSTRAINTS
+### PROJECT CONSTRAINTS
 
 - Users will schedule (CMS) videos on Roku by changing a value in a custom tag. Not all content in CPAD can go on Roku and CPAD does not have a Roku flag.
 - We must store Roku series title, short descript, long descript, tags, genres, release date in Brightcove custom fields.
@@ -37,11 +37,51 @@ Videos are hosted on Brightcove...
 - Reference: apis.support.brightcove.com/cms/searching/cmsplayback-api-videos-search.html
 - Reference: apis.support.brightcove.com/cms/searching/cmsplayback-api-videos-search.html
 
-### SOCIAL SYNDICATION CONSTRAITS
+### SOCIAL SYNDICATION API CONSTRAINTS
 
 - Returns only 100 videos (need to confirm)
 - Nowhere to host series images (may not be a showstopper)
 - Liquid not capable of creating nested series, seasons, episodes (need to conmfirm)
+
+### BC CUSTOM FIELD CONSTRAINTS
+
+- Max of 50 allowed
+- Can only be deleted by BC
+- Text, restricted list, or boolean
+- Provide display name, internal name, type, description
+- Internal name can only be alphanumeric (no spaces, dashes or underscores)
+- Display and internal names 128 chars max
+- Description 500 chars max
+- You cannot search on values shorter than 3 chars
+
+### PROPOSED BC CUSTOM FIELDS (Display name / Internal name / Data type / TS XML field)
+
+- Syndication Flag / syndicationflag / restricted list: true, false  / NA
+- Syndication Type / syndicationtype / restricted list: series, movie, shortFormVideo, tvSpecial / NA
+- Syndication Series Number / syndicationseriesnumber / text / TBD
+- Syndication Series Name / syndicationseriesname / text / TBD
+- Syndication Series Description / syndicationseriesdescription / text / TBD
+- Syndication Series Keywords / syndicationserieskeywords / text: comma separated list / NA
+- Syndication Series Genres / syndicationseriesgenres / text: comma separated list / NA
+- Syndication Series Release Date / syndicationseriesreleasedate / text / TBD
+- Syndication Season Number / syndicationseasonnumber / text / SeasonNumber
+- Syndication Episode Number / syndicationepisodenumber / text / EPISODE_ORDER
+
+### ROKU SERIES OBJECT
+
+- Series         { id, title, thumb, shortDescript, longDescription, releaseDate, genres, tags, seasons[]  }
+- Series         { id, title, thumb, shortDescript, longDescription, releaseDate, genres, tags, episodes[] }
+- seasons        {seasonNumber, episodes[] }
+
+### ROKU VIDEO OBJECT
+
+- Movie          { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, genres, tags }
+- tvSpecial      { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, genres, tags }
+- shortFormVideo { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, genres, tags }
+- episode        { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, episodeNumber }
+- content { dateAdded, duration, language, validityPeriodStart, validityPeriodEnd, videos{}, captions{} }
+- video { url, quality, videoType }
+- captions {url, language, captionType}
 
 ### QUESTIONS
 
@@ -51,10 +91,10 @@ Videos are hosted on Brightcove...
 
 ### TO DO
 
-- Search by complete, shedule.starts_at, schedule-ends_at, roku, state  
-- Captions.  
-- Error handling.
-- BC CMS API creds should be read only  
+- Search by complete, shedule.starts_at, schedule-ends_at, roku, state
+- Captions
+- Error handling
+- BC CMS API creds should be read only
 - Logging
 - Re-tries
 - Rate limiting
@@ -71,16 +111,6 @@ Videos are hosted on Brightcove...
 Brightcove playlists: more manual effort by MSOs, max 100 videos so need playlist for every season, cannot search videos by playable  
 Brightcove folders: name field only  
 CPAD programs: requires more complexity, would still need to call BC for URL and strand  
-
-### BC CUSTOM FIELDS REQUIRED
-
-- TVOSeriesName (already exists): 1st ep only  
-- seriesDescription (new): 1st ep only  
-- seriesKeywords (new): 1st ep only  
-- seriesGenres (new): 1st ep only  
-- seriesReleaseDate (new): 1st ep only  
-- seasonNumber (new): all eps, pull from TS XML "SeasonNumber"  
-- episodeNumber (new): all eps, pull from TS XML "EPISODE_ORDER"  
 
 ### CMS API ENDPOINTS
 
