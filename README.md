@@ -8,29 +8,28 @@ Videos are hosted on Brightcove...
 
 ### PROJECT CONSTRAINTS
 
-- Users will schedule (CMS) videos on Roku by changing a value in a custom tag. Not all content in CPAD can go on Roku and CPAD does not have a Roku flag.
-- We must store Roku series title, short descript, long descript, tags, genres, release date in Brightcove custom fields.
-- Any metadata must come from Brightcove. This is because calling Brightcove and CPAD increases complexity.
-- We have to make numerous calls to Brightcove: oauth, videos, and sources. Sources is the only place we can get the video URL.
+- Users will schedule (CMS) videos by changing values in BC custom fields. At out request, BC added 10 additional custom fields.
+- We will not use CPAD because it does not have a roku live/not live flag or video URLs so we would still need to call BC. Calling both is overly complex.
+- We have to make multiple calls to Brightcove: oauth, videos, and sources. Sources is the only place we can get the video URL.
 - We can only get max of 100 videos at a time and max of only 1 source at a time.
 - We will need to cache the feed in a json file. Brightcove calls can't be triggered by Roku because Roku will time out waiting for the calls to finish.
 - Roku requires still images for series. They will need to be stored on the node.js server or they may already exist on TVO server.
 - Users will not be able to upload series images on their own. We will have to do it for them. This is because there will be no front end for uploading images.
-- Brightcove URLs expire. We will have to ask them to extend the expiry time. Or have a proxy inbewteen roku feed and brightcove.
+- Brightcove URLs expire. At our request, they have extended the expiry time from 6 hrs to 7 days.
 - Agenda eps are in segments. Roku has no concept of segments.
 - We will need to call different Brightcove accounts in the same Roku channel.
 - Ownership is set at the channel level, NOT the series or video level!
-- Pub/kill dates are same for Roku as they are for web sites. These are set in the feed, under Content.  
+- Pub/kill dates are the same for Roku as they are for web sites. These are set in the feed, under Content.  
 - Roku Direct Publisher is slow to update which makes it slow to test and trouble shoot.
-- We cannot use the BC Playback API, which is simpler. See constraints below.
+- We cannot use the BC Playback API, which is much simpler. See constraints below.
 - We cannot use the BC Social Syndication API, which is much simpler. See contstraints below.
-- There is ZERO feed validation happening. Whatever is set on BC will go into the feed as is.
+- There is almost ZERO feed validation happening. Whatever is set on BC will go into the feed as is.
 
 ### PLAYBACK API CONSTRAINTS
 
 - The playback API returns everything in a single call (oauth, videos, sources).
 - The Playback API is faster.
-- But we cannot use it due to the following constraints.
+- But we cannot use it due to the following constraints:
 - Results are geo-restricted (may be able to locate AWS server in Canadian region)
 - Search returns max of 1000 videos.
 - Reference: apis.support.brightcove.com/playback/references/reference_v2.html
@@ -39,33 +38,32 @@ Videos are hosted on Brightcove...
 
 ### SOCIAL SYNDICATION API CONSTRAINTS
 
-- Returns only 100 videos (need to confirm)
-- Nowhere to host series images (may not be a showstopper)
-- Liquid not capable of creating nested series, seasons, episodes (need to conmfirm)
+- Returns only 100 videos at a time. You must make multiple API calls to get all videos. This make it impossible to organize videos by series, seasons, and episodes.
+- Does not offer a solution to host series images (may not be a showstopper).
 
 ### BC CUSTOM FIELD CONSTRAINTS
 
 - Max of 50 allowed
 - Can only be deleted by BC
-- Text, restricted list, or boolean
+- Text or restricted list
 - Provide display name, internal name, type, description
 - Internal name can only be alphanumeric (no spaces, dashes or underscores)
 - Display and internal names 128 chars max
 - Description 500 chars max
 - You cannot search on values shorter than 3 chars
 
-### PROPOSED BC CUSTOM FIELDS (Display name / Internal name / Data type / TS XML field)
+### PROPOSED BC CUSTOM FIELDS (Display name / Internal name / Data type / TS XML field / Description)
 
-- Syndication Flag / syndicationflag / restricted list: true, false  / NA
-- Syndication Type / syndicationtype / restricted list: series, movie, shortFormVideo, tvSpecial / NA
-- Syndication Series Number / syndicationseriesnumber / text / TBD
-- Syndication Series Name / syndicationseriesname / text / TBD
-- Syndication Series Description / syndicationseriesdescription / text / TBD
-- Syndication Series Keywords / syndicationserieskeywords / text: comma separated list / NA
-- Syndication Series Genres / syndicationseriesgenres / text: comma separated list / NA
-- Syndication Series Release Date / syndicationseriesreleasedate / text / TBD
-- Syndication Season Number / syndicationseasonnumber / text / SeasonNumber
-- Syndication Episode Number / syndicationepisodenumber / text / EPISODE_ORDER
+- OTT Flag / ottflag / restricted list: true, false  / NA / Controls whether this vidoe appears on OTT platforms or not. Leaving this field blank is the same as choosing false.
+- OTT Type / otttype / restricted list: series, movie, shortFormVideo, tvSpecial / NA
+- OTT Series Number / ottseriesnumber / text / TBD
+- OTT Series Name / ottseriesname / text / TBD
+- OTT Series Description / ottseriesdescription / text / TBD
+- OTT Series Keywords / ottserieskeywords / text: comma separated list / NA
+- OTT Series Genres / ottseriesgenres / text: comma separated list / NA
+- OTT Series Release Date / ottseriesreleasedate / text / TBD
+- OTT Season Number / ottseasonnumber / text / SeasonNumber
+- OTT Episode Number / ottepisodenumber / text / EPISODE_ORDER
 
 ### ROKU SERIES OBJECT
 
@@ -85,9 +83,7 @@ Videos are hosted on Brightcove...
 
 ### QUESTIONS
 
-- Roku's sample feed does not adhere to their spec doc. Which is correct?  
-- Do you control what gets into a Roku category using series tags or episode tags?  
-- Do I need to sort the array? Does Roku care?  
+- Roku's sample feed does not adhere to their spec doc. Which is correct?
 
 ### TO DO
 

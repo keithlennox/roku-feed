@@ -97,7 +97,6 @@ createFeed = async (account) => {
       let videoObject = {
         "id": bcItem.reference_id,
         "title": bcItem.name,
-        "thumbnail": bcItem.images.thumbnail.src,
         "releaseDate": bcItem.schedule.starts_at,
         "episodeNumber": bcItem.custom_fields.syndicationepisodenumber,
         "shortDescription": bcItem.description,
@@ -114,14 +113,33 @@ createFeed = async (account) => {
             "quality": "FHD"
           }],
           "captions": {
-            "url": "tbd",
             "language": "en",
             "captionType": "CLOSED_CAPTION"
           }
         }
       };
       //console.log(JSON.stringify(videoObject));
-        
+
+      //Add thumb URL to Roku video object
+      bcItem.images.thumbnail.sources.forEach((source) => {
+        if(source.src.startsWith("https://")) {
+          videoObject.thumbnail = source.src
+        }
+      }) 
+      
+      //Add caption URL to Roku video object
+      if(bcItem.text_tracks.length != 0) {
+        bcItem.text_tracks.forEach((text_track) => {
+          if(text_track.kind === "captions") {
+            text_track.sources.forEach((source) => {
+              if(source.src.startsWith("https://")) {
+                videoObject.content.captions.url = source.src
+              }
+            })//End 2nd loop
+          }//End 2nd if
+        })//End 1st loop
+      } //End 1st if
+      
       //Add Roku objects to Roku feed
       let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.syndicationseriesname) //For each bc video, check if series INDEX exists in the Roku array
       if(rokuSeriesIndex === -1) { //If series does not exist...
@@ -135,7 +153,7 @@ createFeed = async (account) => {
           }
       }
     
-    })
+    }) //End loop thru Brightcove videos
    
     //Write Roku feed to file
     console.log("Writing Roku object to file");
@@ -145,9 +163,10 @@ createFeed = async (account) => {
     });
 
   }catch(error){
-      console.log(error);
+    console.log(error); //Need to log these
   }
-}
+
+} //End create feed function
 
 //SLEEP FUNCTION (works with async/await)
 //sitepoint.com/delay-sleep-pause-wait
