@@ -5,6 +5,8 @@ const bcObject = require('./data2.json')
 var fs = require('fs');
 const cron = require('node-cron');
 
+console.log('Hello from the CRON!')
+
 //Set vars
 const account = "18140038001";
 //const search = "history";
@@ -14,6 +16,7 @@ const search = "roku";
 //TO DO: error handling, logging, re-tries, rate limiting, handle multiple bc accounts, filter for playable videos, handle multiple content types
 createFeed = async (account) => {
   try {
+    console.log("CRON triggered")
 
     //Get count
     let options = await getToken(); //This may need to be called on each CMS call
@@ -51,6 +54,7 @@ createFeed = async (account) => {
     //gomakethings.com/sorting-an-array-by-multiple-criteria-with-vanilla-javascript/
     //parseInt() required because Brightcove only returns strings. You cannot sort numbers properly (11 is less than 2) unless they are integers.
     //console.log(bcObject);
+    console.log("Sorting array");
     bcObject.sort(function (a, b) {
       if(a.series > b.series) return 1;
       if(a.series < b.series) return -1;
@@ -62,6 +66,7 @@ createFeed = async (account) => {
     //console.log(bcObject);
 
     //Create Roku feed
+    console.log("Creating Roku object");
     let rokuFeed = {
       "providerName": "TVO", 
       "language": "en-US", 
@@ -73,23 +78,22 @@ createFeed = async (account) => {
       - If any field is blank, do not add vodeo, but log error
       - if series does not exist in the Roku feed, season must = 1 + ep must = 1. This insures that we will get all series info and that you cannot have a series that does not have at least S1E1. Log error.
     */
+    console.log("Populating Roku object");
     bcObject.forEach((bcItem) => { //Loop thru brightcove videos
 
-      //Create Roku series object (not used yet)
-      if(bcItem.custom_fields.syndicationseasonnumber === "1" && bcItem.custom_fields.syndicationepisodenumber === "1") {
-        let seriesObject = {
-          "id": bcItem.custom_fields.syndicationseriesnumber,
-          "releaseDate": bcItem.custom_fields.syndicationseriesreleasedate,
-          "shortDescription": bcItem.custom_fields.syndicationseriesdescription,
-          "tags": bcItem.custom_fields.syndicationserieskeywords,
-          "title": bcItem.custom_fields.syndicationseriesname,
-          "genres": bcItem.custom_fields.syndicationseriesgeneres,
-          "thumbnail": "tbd",
-        }
-        console.log(JSON.stringify(seriesObject));
+      //Create Roku series object
+      let seriesObject = {
+        "id": bcItem.custom_fields.syndicationseriesnumber,
+        "releaseDate": bcItem.custom_fields.syndicationseriesreleasedate,
+        "shortDescription": bcItem.custom_fields.syndicationseriesdescription,
+        "tags": bcItem.custom_fields.syndicationserieskeywords,
+        "title": bcItem.custom_fields.syndicationseriesname,
+        "genres": bcItem.custom_fields.syndicationseriesgeneres,
+        "thumbnail": bcItem.images.thumbnail.src //We need to replace with series image
       }
-        
-      //Create Roku video object (not used yet)
+      //console.log(JSON.stringify(seriesObject));
+
+      //Create Roku video object
       let videoObject = {
         "id": bcItem.reference_id,
         "title": bcItem.name,
@@ -118,24 +122,24 @@ createFeed = async (account) => {
       };
       //console.log(JSON.stringify(videoObject));
         
-      //Add objects to Roku feed
-      let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.syndicationseriesname) //Get the series index from the Roku series array, if it exists
-      if(rokuSeriesIndex === -1) { //If the BC series does not exist in the Roku series array
-          rokuFeed.series.push({"title": bcItem.custom_fields.syndicationseriesname, "seasons":[{"seasonNumber": bcItem.custom_fields.syndicationseasonnumber, "episodes": [{"title": bcItem.name, "episode": bcItem.custom_fields.syndicationepisodenumber}]}]}); //Push BC series to Rocku series array
-      }else{ //If the BC series does exist in the Roku series array
-          let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber === bcItem.custom_fields.syndicationseasonnumber) //Get the season index from the Roku seasons array, if it exists
-          if(rokuSeasonIndex === -1) { //If the BC season does not exist in the Roku season array
-              rokuFeed.series[rokuSeriesIndex].seasons.push({"seasonNumber": bcItem.custom_fields.syndicationseasonnumber, "episodes": [{"title": bcItem.name, "episode": bcItem.custom_fields.syndicationepisodenumber}]});//Push the BC season and episode to the seasons array
-          }else{ //If the BC season does exist in the Roku season array
-              rokuFeed.series[rokuSeriesIndex].seasons[rokuSeasonIndex].episodes.push({"title": bcItem.name, "episode": bcItem.custom_fields.syndicationepisodenumber}); //Push the BC episode to the existing Roku season in the Roku seasons array
+      //Add Roku objects to Roku feed
+      let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.syndicationseriesname) //For each bc video, check if series INDEX exists in the Roku array
+      if(rokuSeriesIndex === -1) { //If series does not exist...
+          rokuFeed.series.push({...seriesObject, "seasons":[{"seasonNumber": bcItem.custom_fields.syndicationseasonnumber, "episodes": [{...videoObject}]}]}); //PUSH series/season/episode to Rocku
+      }else{ //If the series does exist...
+          let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber === bcItem.custom_fields.syndicationseasonnumber) //Check if season INDEX exists
+          if(rokuSeasonIndex === -1) { //If the season does not exist...
+              rokuFeed.series[rokuSeriesIndex].seasons.push({"seasonNumber": bcItem.custom_fields.syndicationseasonnumber, "episodes": [{...videoObject}]});//PUSH season/episode to Roku
+          }else{ //If the season does exist...
+              rokuFeed.series[rokuSeriesIndex].seasons[rokuSeasonIndex].episodes.push({...videoObject}); //PUSH episode to Roku
           }
       }
     
     })
-
-    //console.log(JSON.stringify(rokuFeed));
-
+   
     //Write Roku feed to file
+    console.log("Writing Roku object to file");
+    console.log(JSON.stringify(rokuFeed));
     fs.writeFile('./feed.json', JSON.stringify(rokuFeed), (err) => {
       if (err) throw err;
     });

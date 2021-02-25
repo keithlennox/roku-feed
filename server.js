@@ -3,6 +3,8 @@ const cors = require('cors');
 const fs = require('fs');
 const cron = require('./cron');
 
+console.log('Hello from the server!')
+
 const app = express();
 app.use(cors());
 app.use(express.urlencoded({extended: false}));
