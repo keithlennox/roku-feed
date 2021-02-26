@@ -1595,7 +1595,7 @@
         "cue_points": [],
         "custom_fields": {
             "syndicationflag": "true",
-            "syndicationtype": "series",
+            "syndicationtype": "shortFormVideos",
             "syndicationseriesnumber": "0279",
             "syndicationseriesname": "Wild Kratts",
             "syndicationseriesdescription": "Wild Kratts series description.",
@@ -2581,7 +2581,7 @@
         "cue_points": [],
         "custom_fields": {
             "syndicationflag": "true",
-            "syndicationtype": "series",
+            "syndicationtype": "shortFormVideos",
             "syndicationseriesnumber": "0279",
             "syndicationseriesname": "Wild Kratts",
             "syndicationseriesdescription": "Wild Kratts series description.",
@@ -2857,7 +2857,7 @@
         "cue_points": [],
         "custom_fields": {
             "syndicationflag": "true",
-            "syndicationtype": "series",
+            "syndicationtype": "movies",
             "syndicationseriesnumber": "2338",
             "syndicationseriesname": "Paw Patrol",
             "syndicationseriesdescription": "Paw Patrol series description.",
@@ -3096,7 +3096,7 @@
         "cue_points": [],
         "custom_fields": {
             "syndicationflag": "true",
-            "syndicationtype": "series",
+            "syndicationtype": "movies",
             "syndicationseriesnumber": "2338",
             "syndicationseriesname": "Paw Patrol",
             "syndicationseriesdescription": "Paw Patrol series description.",
@@ -3750,7 +3750,7 @@
         "cue_points": [],
         "custom_fields": {
             "syndicationflag": "true",
-            "syndicationtype": "series",
+            "syndicationtype": "movies",
             "syndicationseriesnumber": "2338",
             "syndicationseriesname": "Paw Patrol",
             "syndicationseriesdescription": "Paw Patrol series description.",
