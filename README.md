@@ -151,3 +151,4 @@ https://apis.support.brightcove.com/cms/code-samples/cms-api-sample-mrss-feed-pl
 https://apis.support.brightcove.com/playback/code-samples/playback-api-sample-jsonmrss-feed-playlist.html  
 https://github.com/registerguard/brightcove-cms-api-php-rss  
 https://www.toptal.com/nodejs/node-js-error-handling  
+https://gomakethings.com/sorting-an-array-by-multiple-criteria-with-vanilla-javascript  

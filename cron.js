@@ -11,6 +11,8 @@ console.log('Hello from the CRON!')
 const account = "18140038001";
 //const search = "history";
 const search = "roku";
+let seriesObject = {};
+let videoObject = {};
 
 //CREATE ROKU FEED
 //TO DO: error handling, logging, re-tries, rate limiting, handle multiple bc accounts, filter for playable videos, handle multiple content types
@@ -50,8 +52,7 @@ createFeed = async (account) => {
     };
     //console.log(videos_array);
 
-    //Sort the videos_array by series, season, episode
-    //gomakethings.com/sorting-an-array-by-multiple-criteria-with-vanilla-javascript/
+    //Sort the videos by series, season, episode
     //parseInt() required because Brightcove only returns strings. You cannot sort numbers properly (11 is less than 2) unless they are integers.
     //console.log(bcObject);
     console.log("Sorting array");
@@ -65,69 +66,37 @@ createFeed = async (account) => {
     });
     //console.log(bcObject);
 
-    //Create Roku feed
-    console.log("Creating Roku object");
-    let rokuFeed = {
-      "providerName": "TVO", 
-      "language": "en-US", 
-      series: []
-    }
+    //Create Roku object
+    let rokuFeed = {"providerName": "TVO", "language": "en-US", series: []}
 
-    //Populate the Roku feed
-    /*Add validation:
-      - If any field is blank, do not add vodeo, but log error
-      - if series does not exist in the Roku feed, season must = 1 + ep must = 1. This insures that we will get all series info and that you cannot have a series that does not have at least S1E1. Log error.
-    */
-    console.log("Populating Roku object");
-    bcObject.forEach((bcItem) => { //Loop thru brightcove videos
+    //Loop thru Brightcove videos
+    bcObject.forEach((bcItem) => { //For each video...
 
-      //Create Roku series object
-      let seriesObject = {
-        "id": bcItem.custom_fields.syndicationseriesnumber,
-        "releaseDate": bcItem.custom_fields.syndicationseriesreleasedate,
-        "shortDescription": bcItem.custom_fields.syndicationseriesdescription,
-        "tags": bcItem.custom_fields.syndicationserieskeywords,
-        "title": bcItem.custom_fields.syndicationseriesname,
-        "genres": bcItem.custom_fields.syndicationseriesgeneres,
-        "thumbnail": bcItem.images.thumbnail.src //We need to replace with series image
-      }
-      //console.log(JSON.stringify(seriesObject));
-
-      //Create Roku video object
-      let videoObject = {
-        "id": bcItem.reference_id,
-        "title": bcItem.name,
-        "releaseDate": bcItem.schedule.starts_at,
-        "episodeNumber": bcItem.custom_fields.syndicationepisodenumber,
-        "shortDescription": bcItem.description,
-        "longDescription": bcItem.long_description,
-        "content": {
-          "dateAdded": bcItem.schedule.starts_at,
-          "duration": bcItem.duration,
-          "language": "en-us",
-          "validityPeriodStart": bcItem.schedule.starts_at,
-          "validityPeriodEnd": bcItem.schedule.ends_at,
-          "videos": [{
-            "videoType": "HLS",
-            "url": bcItem.video_url,
-            "quality": "FHD"
-          }],
-          "captions": {
-            "language": "en",
-            "captionType": "CLOSED_CAPTION"
-          }
-        }
-      };
-      //console.log(JSON.stringify(videoObject));
-
-      //Add thumb URL to Roku video object
+      //Create temporary video object
+      videoObject.id = bcItem.reference_id;
+      videoObject.title = bcItem.name;
+      videoObject.releaseDate = bcItem.schedule.starts_at;
+      videoObject.episodeNumber = bcItem.custom_fields.syndicationepisodenumber;
+      videoObject.shortDescription = bcItem.description;
+      videoObject.longDescription = bcItem.long_description;
+      videoObject.content = {};
+      videoObject.content.dateAdded = bcItem.schedule.starts_at;
+      videoObject.content.duration = bcItem.duration;
+      videoObject.content.language = "en-us";
+      videoObject.content.validityPeriodStart = bcItem.schedule.starts_at;
+      videoObject.content.validityPeriodEnd = bcItem.schedule.ends_at;
+      videoObject.content.videos = {};
+      videoObject.content.videos.videoType = "HLS";
+      videoObject.content.videos.url = bcItem.video_url;
+      videoObject.content.videos.quality = "FHD";
+      videoObject.content.captions = {};
+      videoObject.content.captions.language = "en";
+      videoObject.content.captions.captionType = "CLOSED_CAPTION";
       bcItem.images.thumbnail.sources.forEach((source) => {
         if(source.src.startsWith("https://")) {
           videoObject.thumbnail = source.src
         }
       }) 
-      
-      //Add caption URL to Roku video object
       if(bcItem.text_tracks.length != 0) {
         bcItem.text_tracks.forEach((text_track) => {
           if(text_track.kind === "captions") {
@@ -135,21 +104,28 @@ createFeed = async (account) => {
               if(source.src.startsWith("https://")) {
                 videoObject.content.captions.url = source.src
               }
-            })//End 2nd loop
-          }//End 2nd if
-        })//End 1st loop
-      } //End 1st if
+            })
+          }
+        })
+      }
       
-      //Add Roku objects to Roku feed
+      //Populate Roku object
       let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.syndicationseriesname) //For each bc video, check if series INDEX exists in the Roku array
       if(rokuSeriesIndex === -1) { //If series does not exist...
-          rokuFeed.series.push({...seriesObject, "seasons":[{"seasonNumber": bcItem.custom_fields.syndicationseasonnumber, "episodes": [{...videoObject}]}]}); //PUSH series/season/episode to Rocku
+        seriesObject.id = bcItem.custom_fields.syndicationseriesnumber;
+        seriesObject.releaseDate = bcItem.custom_fields.syndicationseriesreleasedate;
+        seriesObject.shortDescription = bcItem.custom_fields.syndicationseriesdescription;
+        seriesObject.tags = bcItem.custom_fields.syndicationserieskeywords;
+        seriesObject.title = bcItem.custom_fields.syndicationseriesname;
+        seriesObject.genres = bcItem.custom_fields.syndicationseriesgeneres;
+        seriesObject.thumbnail = bcItem.images.thumbnail.src;
+        rokuFeed.series.push({...seriesObject, "seasons":[{"seasonNumber": bcItem.custom_fields.syndicationseasonnumber, "episodes": [{...videoObject}]}]}); //PUSH series/season/episode to Rocku
       }else{ //If the series does exist...
-          let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber === bcItem.custom_fields.syndicationseasonnumber) //Check if season INDEX exists
-          if(rokuSeasonIndex === -1) { //If the season does not exist...
-              rokuFeed.series[rokuSeriesIndex].seasons.push({"seasonNumber": bcItem.custom_fields.syndicationseasonnumber, "episodes": [{...videoObject}]});//PUSH season/episode to Roku
+        let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber === bcItem.custom_fields.syndicationseasonnumber) //Check if season INDEX exists
+        if(rokuSeasonIndex === -1) { //If the season does not exist...
+            rokuFeed.series[rokuSeriesIndex].seasons.push({"seasonNumber": bcItem.custom_fields.syndicationseasonnumber, "episodes": [{...videoObject}]});//PUSH season/episode to Roku
           }else{ //If the season does exist...
-              rokuFeed.series[rokuSeriesIndex].seasons[rokuSeasonIndex].episodes.push({...videoObject}); //PUSH episode to Roku
+            rokuFeed.series[rokuSeriesIndex].seasons[rokuSeasonIndex].episodes.push({...videoObject}); //PUSH episode to Roku
           }
       }
     
