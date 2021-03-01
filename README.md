@@ -100,6 +100,7 @@ Videos are hosted on Brightcove...
 - Upload series image files and serve them
 - Add and populate BC custom fields
 - Map all bc fields to Roku feed
+- Add ability to manually trigger script on demand.
 
 ### WHERE TO STORE SERIES INFO (* indicates chosen option)
 
@@ -107,6 +108,17 @@ Videos are hosted on Brightcove...
 Brightcove playlists: more manual effort by MSOs, max 100 videos so need playlist for every season, cannot search videos by playable  
 Brightcove folders: name field only  
 CPAD programs: requires more complexity, would still need to call BC for URL and strand  
+
+### ERROR HANDLING (retry, log, notify)
+- Get bc token.
+- Get next 100 bc videos: try{API call}catch{retry x3, log, skip}
+- Get bc source: try{API call}catch{retry x3, log, skip}
+- Push video to bc video array: try{validate video fields, throw error}catch{log, skip}
+- Sort videos.
+- Push video to Roku array.
+- Write roku array to file: try{}catch{retry x3, log}
+- All other errors use gloabl catch.
+- For any error, send email: "There was an error. Please checks log".
 
 ### CMS API ENDPOINTS
 
