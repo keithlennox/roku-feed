@@ -110,15 +110,18 @@ Brightcove folders: name field only
 CPAD programs: requires more complexity, would still need to call BC for URL and strand  
 
 ### ERROR HANDLING (retry, log, notify)
-- Get bc token.
+
+GET VIDEOS
 - Get next 100 bc videos: try{API call}catch{retry x3, log, skip}
 - Get bc source: try{API call}catch{retry x3, log, skip}
 - Push video to bc video array: try{validate video fields, throw error}catch{log, skip}
-- Sort videos.
-- Push video to Roku array.
+- Sort bc videos
+
+CREATE ROKU FEED
+- try{if bc video array is empty throw error else push videos to Roku array}catch{log error, skip}
 - Write roku array to file: try{}catch{retry x3, log}
-- All other errors use gloabl catch.
-- For any error, send email: "There was an error. Please checks log".
+- All other errors use gloabl catch
+- For any error, send email: "There was an error. Please checks log"
 
 ### CMS API ENDPOINTS
 
