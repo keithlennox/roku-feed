@@ -16,7 +16,7 @@ const getVideo = (account) => {
             console.log(error);
         }
     }
-    return "What the fuck just happened?";
+    return "What the heck just happened?";
 }
 
 //FUNCTION 2

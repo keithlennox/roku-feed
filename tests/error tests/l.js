@@ -13,7 +13,7 @@ const getVideos = () => {
   }catch{
     counter = counter + 1;
     if(counter < 3) {
-      console.log("Shit!");
+      console.log("Oooops!");
       getVideos();
     }
   }

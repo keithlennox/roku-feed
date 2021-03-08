@@ -13,7 +13,7 @@ while(counter < 3) {
     console.log(myVar);
     break;
   }catch{
-    console.log("Shit!");
+    console.log("Oooops!");
   }
   counter = counter + 1;
 }
