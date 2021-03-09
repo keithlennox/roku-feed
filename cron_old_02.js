@@ -5,7 +5,6 @@ const bcObject = require('./data2.json')
 
 console.log('Hello from the CRON!')
 
-//Get API token (required for all Brightcove API calls)
 const getToken = async () => {
   console.log("Retrieving token");
   const client_id = "2a703469-6009-4204-bcb3-ba3cec61abf5";
@@ -19,22 +18,16 @@ const getToken = async () => {
     }
   }
   try {
-    let now =  Date.now();
-    if(now > getToken.expireTime || !getToken.expireTime) { //If Brightcove token has expired or is undefined
-      let oauth_result = await axios.post("https://oauth.brightcove.com/v3/access_token", oauth_body, oauth_options)
-      getToken.options = { //Token saved as function parameter so it persists between function calls
-        headers: {
-          'Authorization': 'Bearer ' + oauth_result.data.access_token,
-          'Content-type' : 'application/json'
-        }
+    let oauth_result = await axios.post("https://oauth.brightcove.com/v3/access_token", oauth_body, oauth_options)
+    let options = {
+      headers: {
+        'Authorization': 'Bearer ' + oauth_result.data.access_token,
+        'Content-type' : 'application/json'
       }
-      getToken.expireTime = Date.now() + 290000; //Now + 290 sec (BC tokens expire in 300 sec / 5 min). Saved as function parameter so it persists between function calls.
-      return getToken.options; //Return a new token
     }
-    return getToken.options; //Return the exisiting token because it has not expired yet
+    return options;
   }catch(error){
-    console.error(error);
-    return "Error";
+    console.log(error);
   }
 }
 
@@ -42,7 +35,7 @@ const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const getBrightcoveVideos = async (account) => {
+const getBrightcoveVideos = async (account, options) => {
   console.log("Retrieving videos")
   let counter = 0; //initialize counter
   let bcVideos = []; //Create empty videos array
@@ -50,7 +43,6 @@ const getBrightcoveVideos = async (account) => {
   while(counter === bcVideos.length) { //Get next 100 videos until no more are returned
     console.log(counter);
     console.log(bcVideos.length);
-    let options = await getToken();
     let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?q=tags:" + search + "&limit=100&offset=" + counter, options);
     for(let bcVideo of response.data) {
       if(bcVideo.custom_fields.tvoseriesname && bcVideo.custom_fields.assettype && bcVideo.custom_fields.sortorder) {
@@ -69,9 +61,8 @@ const getBrightcoveVideos = async (account) => {
   return bcVideos;
 }
 
-const getBrightcoveSource = async (account, bcVideo) => {
+const getBrightcoveSource = async (account, bcVideo, options) => {
   console.log("Retrieving source");
-  let options = await getToken();
   let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos/" + bcVideo + "/sources", options) //Get the sorces array
   for(let source of response.data) { //For each sources array...
     if(source.src && source.src.startsWith("https://") && source.type === "application/x-mpegURL") { //Get the HLS source
@@ -178,7 +169,8 @@ const writeRokuFeed = (rokuFeed) => {
 
 const tempcron = async () => {
   console.log("CRON triggered");
-  let bcVideos = await getBrightcoveVideos(18140038001);
+  let options = await getToken();
+  let bcVideos = await getBrightcoveVideos(18140038001, options);
   bcObject.sort(sortBrightcoveVideos);
   let rokuFeed = createRokuFeed(bcObject);
   writeRokuFeed(rokuFeed);
