@@ -1,13 +1,12 @@
 const axios = require('axios');
 var fs = require('fs');
 const cron = require('node-cron');
-const dummyBcSourcedVideos = require('./data2.json')
+const dummyBcSourcedVideos = require('./data.json')
 
 console.log('Hello from the CRON!')
 
 //Get API token (required for all Brightcove API calls)
 const getToken = async () => {
-  console.log("Retrieving token");
   const client_id = "2a703469-6009-4204-bcb3-ba3cec61abf5";
   const client_secret = "4munZY-rUvfs-SnoaMXkkywC_z9Li5fViX_GGOz2k9A-IwkOhEksFiGsdG88g_1JmuYd_60Tvk5wf48Cdvv52g";
   var auth_string = new Buffer(client_id + ":" + client_secret).toString('base64');
@@ -28,8 +27,10 @@ const getToken = async () => {
         }
       }
       getToken.expireTime = Date.now() + 290000; //Now + 290 sec (BC tokens expire in 300 sec / 5 min). Saved as function parameter so it persists between function calls.
+      console.log("Returned new token");
       return getToken.options; //Return a new token
     }
+    console.log("Returned exisiting token");
     return getToken.options; //Return the exisiting token because it has not expired yet
 }
 
@@ -50,7 +51,7 @@ const getBrightcoveVideos = async (account) => {
         let options = await getToken();
         let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?q=tags:" + search + "&limit=100&offset=" + counter, options);
         bcVideos.push(...response.data);
-        console.log("Next 100")
+        console.log("Get next 100 videos")
         break; //No need to retry
       }catch(error){
         console.error(error);
@@ -89,32 +90,31 @@ const getBrightcoveSource = async (bcVideos) => {
 
 const filterBrightcoveVideos = (bcSourcedVideos) => {
   console.log("Filtering videos");
-  const filteredVideos = [];
+  let filteredVideos = [];
+  console.log(filteredVideos);
   for(let bcVideo of bcSourcedVideos) {
-    if(bcVideo.custom_fields.syndicationtype && bcVideo.custom_fields.syndicationseriesname && bcVideo.custom_fields.syndicationseasonnumber && bcVideo.custom_fields.syndicationepisodenumber && bcVideo.video_url) {
-      if(bcVideo.custom_fields.syndicationtype === "series") {
-        console.log("Add series");
-        if(!filteredVideos.hasOwnProperty("series")) {filteredVideos.series = []}
-        filteredVideos.series.push(bcVideo);
-      }else if(bcVideo.custom_fields.syndicationtype === "series without seasons") {
-        console.log("Add serieswithseasons");
-        if(!filteredVideos.hasOwnProperty("series without seasons")) {filteredVideos.serieswithoutseasons = []}
-        filteredVideos.serieswithoutseasons.push(bcVideo);
-      }else if(bcVideo.custom_fields.syndicationtype === "movies") {
-        console.log("Add movies");
-        if(!filteredVideos.hasOwnProperty("movies")) {filteredVideos.movies = []}
-        filteredVideos.movies.push(bcVideo);
-      }else if(bcVideo.custom_fields.syndicationtype === "tvSpecial") {
-        console.log("Add tvSpecial");
-        if(!filteredVideos.hasOwnProperty("tvSpecial")) {filteredVideos.tvSpecial = []}
-        filteredVideos.tvSpecial.push(bcVideo);
-      }else{
-        //throw { name: "MissingCustomField", message: "Brightcove contenttype is missing!" };
-      }
+    let bc = bcVideo.custom_fields;
+    if(bc.otttype === "series with seasons" && bc.ottseriesname && bc.ottseasonnumber && bc.ottepisodenumber && bcVideo.video_url) {
+      console.log("Add series with seasons");
+      if(!filteredVideos.hasOwnProperty("series with seasons")) {filteredVideos["series with seasons"] = []}
+      filteredVideos["series with seasons"].push(bcVideo);
+    }else if(bc.otttype === "series without seasons" && bc.ottseriesname && bc.ottepisodenumber && bcVideo.video_url) {
+      console.log("Add series without seasons");
+      if(!filteredVideos.hasOwnProperty("series without seasons")) {filteredVideos["series without seasons"] = []}
+      filteredVideos["series without seasons"].push(bcVideo);
+    }else if(bc.otttype === "movies" && bcVideo.video_url) {
+      console.log("Add movies");
+      if(!filteredVideos.hasOwnProperty("movies")) {filteredVideos["movies"] = []}
+      filteredVideos["movies"].push(bcVideo);
+    }else if(bc.otttype === "tv specials" && bcVideo.video_url) {
+      console.log("Add tv specials");
+      if(!filteredVideos.hasOwnProperty("tv specials")) {filteredVideos["tv specials"] = []}
+      filteredVideos["tv specials"].push(bcVideo);
     }else{
-      //throw { name: "MissingContentType", message: "A required Brightcove custom field is missing!" };
+      //throw { name: "MissingBrightcoveField", message: "Brightcove field is missing!" };
     }
   }
+  console.log(filteredVideos);
   return filteredVideos;
 }
 
@@ -122,10 +122,10 @@ const sortBrightcoveVideos = (a, b) => {
   console.log("Sorting videos");
   if(a.series > b.series) return 1;
   if(a.series < b.series) return -1;
-  if(parseInt(a.custom_fields.syndicationseasonnumber) > parseInt(b.custom_fields.syndicationseasonnumber)) return 1;
-  if(parseInt(a.custom_fields.syndicationseasonnumber) < parseInt(b.custom_fields.syndicationseasonnumber)) return -1;
-  if(parseInt(a.custom_fields.syndicationepisodenumber) > parseInt(b.custom_fields.syndicationepisodenumber)) return 1;
-  if(parseInt(a.custom_fields.syndicationepisodenumber) < parseInt(b.custom_fields.syndicationepisodenumber)) return -1;
+  if(parseInt(a.custom_fields.ottseasonnumber) > parseInt(b.custom_fields.ottseasonnumber)) return 1;
+  if(parseInt(a.custom_fields.ottseasonnumber) < parseInt(b.custom_fields.ottseasonnumber)) return -1;
+  if(parseInt(a.custom_fields.ottepisodenumber) > parseInt(b.custom_fields.ottepisodenumber)) return 1;
+  if(parseInt(a.custom_fields.ottepisodenumber) < parseInt(b.custom_fields.ottepisodenumber)) return -1;
 }
 
 const createRokuVideo = (bcItem) => {
@@ -133,7 +133,7 @@ const createRokuVideo = (bcItem) => {
   videoObject.id = bcItem.reference_id;
   videoObject.title = bcItem.name;
   videoObject.releaseDate = bcItem.schedule.starts_at;
-  videoObject.episodeNumber = bcItem.custom_fields.syndicationepisodenumber;
+  videoObject.episodeNumber = bcItem.custom_fields.ottepisodenumber;
   videoObject.shortDescription = bcItem.description;
   videoObject.longDescription = bcItem.long_description;
   videoObject.content = {};
@@ -170,40 +170,72 @@ const createRokuVideo = (bcItem) => {
 
 let createRokuSeries = (bcItem) => {
   let seriesObject = {};
-  seriesObject.id = bcItem.custom_fields.syndicationseriesnumber;
-  seriesObject.releaseDate = bcItem.custom_fields.syndicationseriesreleasedate;
-  seriesObject.shortDescription = bcItem.custom_fields.syndicationseriesdescription;
-  seriesObject.tags = bcItem.custom_fields.syndicationserieskeywords;
-  seriesObject.title = bcItem.custom_fields.syndicationseriesname;
-  seriesObject.genres = bcItem.custom_fields.syndicationseriesgeneres;
+  seriesObject.id = bcItem.custom_fields.ottseriesnumber;
+  seriesObject.releaseDate = bcItem.custom_fields.ottseriesreleasedate;
+  seriesObject.shortDescription = bcItem.custom_fields.ottseriesdescription;
+  seriesObject.tags = bcItem.custom_fields.ottserieskeywords;
+  seriesObject.title = bcItem.custom_fields.ottseriesname;
+  seriesObject.genres = bcItem.custom_fields.ottseriesgeneres;
   seriesObject.thumbnail = bcItem.images.thumbnail.src;
   return seriesObject;
 }
 
 const createRokuFeed = (bcObject) => {
-  let rokuFeed = {"providerName": "TVO", "language": "en-US"};
-  bcObject.forEach((bcItem) => { //For each video...
-    let videoObject = createRokuVideo(bcItem);
-    if(bcItem.custom_fields.syndicationtype === "series") { //If Roku type = series...
+  let rokuFeed = {"providerName": "TVO", "language": "en-US"}; //Add last updated
+
+  //Series with seasons
+  if(bcObject.hasOwnProperty("series with seasons")) {
+    bcObject["series with seasons"].forEach((bcItem) => { //For each video...
+      let videoObject = createRokuVideo(bcItem);
       if(!rokuFeed.hasOwnProperty("series")) {rokuFeed.series = []}
-      let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.syndicationseriesname) //For each bc video, check if series INDEX exists in the Roku array
+      let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.ottseriesname) //For each bc video, check if series INDEX exists in the Roku array
       if(rokuSeriesIndex === -1) { //If series does not exist...
         let seriesObject = createRokuSeries(bcItem);
-        rokuFeed.series.push({...seriesObject, "seasons":[{"seasonNumber": bcItem.custom_fields.syndicationseasonnumber, "episodes": [{...videoObject}]}]}); //PUSH series/season/episode to Rocku
+        rokuFeed.series.push({...seriesObject, "seasons":[{"seasonNumber": bcItem.custom_fields.ottseasonnumber, "episodes": [{...videoObject}]}]}); //PUSH series/season/episode to Rocku
       }else{ //If the series does exist...
-        let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber === bcItem.custom_fields.syndicationseasonnumber) //Check if season INDEX exists
+        let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber === bcItem.custom_fields.ottseasonnumber) //Check if season INDEX exists
         if(rokuSeasonIndex === -1) { //If the season does not exist...
-            rokuFeed.series[rokuSeriesIndex].seasons.push({"seasonNumber": bcItem.custom_fields.syndicationseasonnumber, "episodes": [{...videoObject}]});//PUSH season/episode to Roku
-          }else{ //If the season does exist...
-            rokuFeed.series[rokuSeriesIndex].seasons[rokuSeasonIndex].episodes.push({...videoObject}); //PUSH episode to Roku
-          }
+          rokuFeed.series[rokuSeriesIndex].seasons.push({"seasonNumber": bcItem.custom_fields.ottseasonnumber, "episodes": [{...videoObject}]});//PUSH season/episode to Roku
+        }else{ //If the season does exist...
+          rokuFeed.series[rokuSeriesIndex].seasons[rokuSeasonIndex].episodes.push({...videoObject}); //PUSH episode to Roku
+        }
       }
-    }else { //Else if Roku type = any other value...
-      if(!rokuFeed.hasOwnProperty(bcItem.custom_fields.syndicationtype)) {rokuFeed[bcItem.custom_fields.syndicationtype] = []}
-      rokuFeed[bcItem.custom_fields.syndicationtype].push({...videoObject}); //PUSH episode to Roku
-    }
+    })
+  }
 
-  }) //End looping thru Brightcove videos
+  //Series without seasons
+  if(bcObject.hasOwnProperty("series without seasons")) {
+    bcObject["series without seasons"].forEach((bcItem) => { //For each video...
+      let videoObject = createRokuVideo(bcItem);
+      if(!rokuFeed.hasOwnProperty("series")) {rokuFeed.series = []}
+      let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.ottseriesname) //For each bc video, check if series INDEX exists in the Roku array
+      if(rokuSeriesIndex === -1) { //If series does not exist...
+        let seriesObject = createRokuSeries(bcItem);
+        rokuFeed.series.push({...seriesObject, "episodes": [{...videoObject}]}); //PUSH series/season/episode to Rocku
+      }else{ //If the series does exist...
+        rokuFeed.series[rokuSeriesIndex].episodes.push({...videoObject}); //PUSH episode to Roku
+      }
+    })
+  }
+
+  //Movies
+  if(bcObject.hasOwnProperty("movies")) {
+    bcObject["movies"].forEach((bcItem) => { //For each Brightcove video
+      let videoObject = createRokuVideo(bcItem);
+      if(!rokuFeed.hasOwnProperty("movies")) {rokuFeed.movies = []}
+      rokuFeed.movies.push(videoObject); //PUSH movie to Roku
+    })
+  }
+
+  //TV Specials
+  if(bcObject.hasOwnProperty("tv specials")) {
+    bcObject["tv specials"].forEach((bcItem) => { //For each video...
+      let videoObject = createRokuVideo(bcItem);
+      if(!rokuFeed.hasOwnProperty("tvSpecials")) {rokuFeed.tvSpecials = []}
+      rokuFeed.tvSpecials.push(videoObject); //PUSH tv special to Roku
+    })
+  }
+
   return rokuFeed;
 }
 
@@ -219,9 +251,8 @@ const tempCron = async () => {
   let bcVideos = await getBrightcoveVideos(18140038001);
   let bcSourcedVideos = await getBrightcoveSource(bcVideos);
   let bcFilteredVideos = filterBrightcoveVideos(dummyBcSourcedVideos);
-  console.log(bcFilteredVideos);
-  bcFilteredVideos.series.sort(sortBrightcoveVideos);
-  let rokuFeed = createRokuFeed(bcFilteredVideos.series);
+  bcFilteredVideos["series with seasons"].sort(sortBrightcoveVideos);
+  let rokuFeed = createRokuFeed(bcFilteredVideos);
   writeRokuFeed(rokuFeed);
 }
 

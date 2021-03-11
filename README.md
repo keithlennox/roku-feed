@@ -86,21 +86,22 @@ Videos are hosted on Brightcove...
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 
 ### TO DO
-
-- Search by complete, shedule.starts_at, schedule-ends_at, roku, state
-- Captions
 - Error handling
 - BC CMS API creds should be read only
+- Handle multiple bc accounts
+- Handle multiple content types
+- Upload series image files and serve them
+- Add and populate BC custom fields
+- Add ability to manually trigger script on demand
+- Map all bc fields to Roku feed
+- Search by complete, shedule.starts_at, schedule-ends_at, roku, state
+- Captions
 - Logging
 - Re-tries
 - Rate limiting
-- Handle multiple bc accounts
-- Handle multiple content types
 - Add series metadata to roku feed, pulling from ep 1 video only
-- Upload series image files and serve them
-- Add and populate BC custom fields
-- Map all bc fields to Roku feed
-- Add ability to manually trigger script on demand.
+
+
 
 ### WHERE TO STORE SERIES INFO (* indicates chosen option)
 
