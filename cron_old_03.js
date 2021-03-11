@@ -1,7 +1,7 @@
 const axios = require('axios');
 var fs = require('fs');
 const cron = require('node-cron');
-const dummyBcSourcedVideos = require('./data2.json')
+const bcObject = require('./data2.json')
 
 console.log('Hello from the CRON!')
 
@@ -18,6 +18,7 @@ const getToken = async () => {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   }
+  try {
     let now =  Date.now();
     if(now > getToken.expireTime || !getToken.expireTime) { //If Brightcove token has expired or is undefined
       let oauth_result = await axios.post("https://oauth.brightcove.com/v3/access_token", oauth_body, oauth_options)
@@ -31,6 +32,10 @@ const getToken = async () => {
       return getToken.options; //Return a new token
     }
     return getToken.options; //Return the exisiting token because it has not expired yet
+  }catch(error){
+    console.error(error);
+    return "Error";
+  }
 }
 
 const sleep = (ms) => {
@@ -38,88 +43,45 @@ const sleep = (ms) => {
 }
 
 const getBrightcoveVideos = async (account) => {
-  console.log("Retrieving videos");
+  console.log("Retrieving videos")
   let counter = 0; //initialize counter
   let bcVideos = []; //Create empty videos array
   const search = "roku";
   while(counter === bcVideos.length) { //Get next 100 videos until no more are returned
-    for (i = 1; i <=3; i++) { //Retry on error
-      try{
-        console.log(counter);
-        console.log(bcVideos.length);
-        let options = await getToken();
-        let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?q=tags:" + search + "&limit=100&offset=" + counter, options);
-        bcVideos.push(...response.data);
-        console.log("Next 100")
-        break; //No need to retry
-      }catch(error){
-        console.error(error);
-        await sleep(5000); //Wait 5 seconds between retries
+    console.log(counter);
+    console.log(bcVideos.length);
+    let options = await getToken();
+    let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?q=tags:" + search + "&limit=100&offset=" + counter, options);
+    for(let bcVideo of response.data) {
+      if(bcVideo.custom_fields.tvoseriesname && bcVideo.custom_fields.assettype && bcVideo.custom_fields.sortorder) {
+        console.log(bcVideo.id);
+        let bcVideoUrl = await getBrightcoveSource(account, bcVideo.id, options);
+        console.log(bcVideoUrl);
+        bcVideo.video_url = bcVideoUrl;
+        bcVideos.push(bcVideo);
+      }else{
+        console.log("Skipped");
       }
-    }//End retry loop
-    await sleep(111); //Brightcove rate limiting = less than 10 requests per second (111 ms = 9 requests per second)
+       await sleep(111); //Brightcove rate limiting = less than 10 requests per second (111 ms = 9 requests per second)
+    };
     counter = counter + 100; //Increment counter
   }
-  return bcVideos;//This may be an empty array if all API calls fail
+  return bcVideos;
 }
 
-const getBrightcoveSource = async (bcVideos) => {
-  console.log("Retrieving sources");
-  for(let bcVideo of bcVideos) {//For every video in the array
-    for (i = 1; i <=3; i++) { //Retry on error
-      try{
-        let options = await getToken();
-        let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + bcVideo.account_id + "/videos/" + bcVideo.id + "/sources", options) //Get the sources array
-        for(let source of response.data) { //For each sources array...
-          if(source.src && source.src.startsWith("https://") && source.type === "application/x-mpegURL") { //Get the HLS source
-            console.log(source.src);
-            bcVideo.video_url = source.src;
-          }
-        }
-        break; // No need to retry
-      }catch(error){
-        console.error(error);
-        await sleep(5000); //Wait 5 seconds between retries
-      }
-    }//End retry loop
-    await sleep(111); //Brightcove rate limiting = less than 10 requests per second (111 ms = 9 requests per second)
-  }
-  return bcVideos;
-} //End function
-
-const filterBrightcoveVideos = (bcSourcedVideos) => {
-  console.log("Filtering videos");
-  const filteredVideos = [];
-  for(let bcVideo of bcSourcedVideos) {
-    if(bcVideo.custom_fields.syndicationtype && bcVideo.custom_fields.syndicationseriesname && bcVideo.custom_fields.syndicationseasonnumber && bcVideo.custom_fields.syndicationepisodenumber && bcVideo.video_url) {
-      if(bcVideo.custom_fields.syndicationtype === "series") {
-        console.log("Add series");
-        if(!filteredVideos.hasOwnProperty("series")) {filteredVideos.series = []}
-        filteredVideos.series.push(bcVideo);
-      }else if(bcVideo.custom_fields.syndicationtype === "series without seasons") {
-        console.log("Add serieswithseasons");
-        if(!filteredVideos.hasOwnProperty("series without seasons")) {filteredVideos.serieswithoutseasons = []}
-        filteredVideos.serieswithoutseasons.push(bcVideo);
-      }else if(bcVideo.custom_fields.syndicationtype === "movies") {
-        console.log("Add movies");
-        if(!filteredVideos.hasOwnProperty("movies")) {filteredVideos.movies = []}
-        filteredVideos.movies.push(bcVideo);
-      }else if(bcVideo.custom_fields.syndicationtype === "tvSpecial") {
-        console.log("Add tvSpecial");
-        if(!filteredVideos.hasOwnProperty("tvSpecial")) {filteredVideos.tvSpecial = []}
-        filteredVideos.tvSpecial.push(bcVideo);
-      }else{
-        //throw { name: "MissingCustomField", message: "Brightcove contenttype is missing!" };
-      }
-    }else{
-      //throw { name: "MissingContentType", message: "A required Brightcove custom field is missing!" };
+const getBrightcoveSource = async (account, bcVideo) => {
+  console.log("Retrieving source");
+  let options = await getToken();
+  let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos/" + bcVideo + "/sources", options) //Get the sorces array
+  for(let source of response.data) { //For each sources array...
+    if(source.src && source.src.startsWith("https://") && source.type === "application/x-mpegURL") { //Get the HLS source
+      console.log(source.src);
+      return source.src;
     }
   }
-  return filteredVideos;
 }
 
 const sortBrightcoveVideos = (a, b) => {
-  console.log("Sorting videos");
   if(a.series > b.series) return 1;
   if(a.series < b.series) return -1;
   if(parseInt(a.custom_fields.syndicationseasonnumber) > parseInt(b.custom_fields.syndicationseasonnumber)) return 1;
@@ -214,15 +176,12 @@ const writeRokuFeed = (rokuFeed) => {
   });
 }
 
-const tempCron = async () => {
+const tempcron = async () => {
   console.log("CRON triggered");
   let bcVideos = await getBrightcoveVideos(18140038001);
-  let bcSourcedVideos = await getBrightcoveSource(bcVideos);
-  let bcFilteredVideos = filterBrightcoveVideos(dummyBcSourcedVideos);
-  console.log(bcFilteredVideos);
-  bcFilteredVideos.series.sort(sortBrightcoveVideos);
-  let rokuFeed = createRokuFeed(bcFilteredVideos.series);
+  bcObject.sort(sortBrightcoveVideos);
+  let rokuFeed = createRokuFeed(bcObject);
   writeRokuFeed(rokuFeed);
 }
 
-tempCron();
+tempcron();
