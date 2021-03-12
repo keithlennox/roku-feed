@@ -88,6 +88,46 @@ const getBrightcoveSource = async (bcVideos) => {
   return bcVideos;
 } //End function
 
+const filterBrightcoveVideos = (bcSourcedVideos) => {
+  console.log("Filtering videos");
+  let filteredVideos = [];
+  console.log(filteredVideos);
+  for(let bcVideo of bcSourcedVideos) {
+    let bc = bcVideo.custom_fields;
+    if(bc.otttype === "series with seasons" && bc.ottseriesname && bc.ottseasonnumber && bc.ottepisodenumber && bcVideo.video_url) {
+      console.log("Add series with seasons");
+      if(!filteredVideos.hasOwnProperty("series with seasons")) {filteredVideos["series with seasons"] = []}
+      filteredVideos["series with seasons"].push(bcVideo);
+    }else if(bc.otttype === "series without seasons" && bc.ottseriesname && bc.ottepisodenumber && bcVideo.video_url) {
+      console.log("Add series without seasons");
+      if(!filteredVideos.hasOwnProperty("series without seasons")) {filteredVideos["series without seasons"] = []}
+      filteredVideos["series without seasons"].push(bcVideo);
+    }else if(bc.otttype === "movies" && bcVideo.video_url) {
+      console.log("Add movies");
+      if(!filteredVideos.hasOwnProperty("movies")) {filteredVideos["movies"] = []}
+      filteredVideos["movies"].push(bcVideo);
+    }else if(bc.otttype === "tv specials" && bcVideo.video_url) {
+      console.log("Add tv specials");
+      if(!filteredVideos.hasOwnProperty("tv specials")) {filteredVideos["tv specials"] = []}
+      filteredVideos["tv specials"].push(bcVideo);
+    }else{
+      //throw { name: "MissingBrightcoveField", message: "Brightcove field is missing!" };
+    }
+  }
+  console.log(filteredVideos);
+  return filteredVideos;
+}
+
+const sortBrightcoveVideos = (a, b) => {
+  console.log("Sorting videos");
+  if(a.series > b.series) return 1;
+  if(a.series < b.series) return -1;
+  if(parseInt(a.custom_fields.ottseasonnumber) > parseInt(b.custom_fields.ottseasonnumber)) return 1;
+  if(parseInt(a.custom_fields.ottseasonnumber) < parseInt(b.custom_fields.ottseasonnumber)) return -1;
+  if(parseInt(a.custom_fields.ottepisodenumber) > parseInt(b.custom_fields.ottepisodenumber)) return 1;
+  if(parseInt(a.custom_fields.ottepisodenumber) < parseInt(b.custom_fields.ottepisodenumber)) return -1;
+}
+
 const createRokuVideo = (bcItem) => {
   let videoObject = {};
   videoObject.id = bcItem.reference_id;
@@ -104,7 +144,7 @@ const createRokuVideo = (bcItem) => {
   videoObject.content.validityPeriodEnd = bcItem.schedule.ends_at;
   videoObject.content.videos = {};
   videoObject.content.videos.videoType = "HLS";
-  if(bcItem.video_url) {videoObject.content.videos.url = bcItem.video_url;}else {throw new ReferenceError("No video url found");}
+  videoObject.content.videos.url = bcItem.video_url;
   videoObject.content.videos.quality = "FHD";
   videoObject.content.captions = {};
   videoObject.content.captions.language = "en";
@@ -128,94 +168,75 @@ const createRokuVideo = (bcItem) => {
   return videoObject;
 }
 
-let createRokuSeries = (bcObject, bcItem) => {
-
-  let bcSeriesItem = bcObject.find((item) => {
-    if(bcItem.custom_fields.otttype === "series with seasons") {
-      return item.custom_fields.ottseriesname === bcItem.custom_fields.ottseriesname && item.custom_fields.ottseasonnumber === "1" && item.custom_fields.ottepisodenumber === "1";
-    }else{
-      return item.custom_fields.ottseriesname === bcItem.custom_fields.ottseriesname && item.custom_fields.ottepisodenumber === "1";
-    }
-  })
-
-  if(bcSeriesItem === undefined) {
-    throw new ReferenceError("First ep for series not found");
-  }
-
+let createRokuSeries = (bcItem) => {
   let seriesObject = {};
-  seriesObject.id = bcSeriesItem.custom_fields.ottseriesnumber;
-  seriesObject.releaseDate = bcSeriesItem.custom_fields.ottseriesreleasedate;
-  seriesObject.shortDescription = bcSeriesItem.custom_fields.ottseriesdescription;
-  seriesObject.tags = bcSeriesItem.custom_fields.ottserieskeywords;
-  seriesObject.title = bcSeriesItem.custom_fields.ottseriesname;
-  seriesObject.genres = bcSeriesItem.custom_fields.ottseriesgeneres;
-  seriesObject.thumbnail = bcSeriesItem.images.thumbnail.src;
+  seriesObject.id = bcItem.custom_fields.ottseriesnumber;
+  seriesObject.releaseDate = bcItem.custom_fields.ottseriesreleasedate;
+  seriesObject.shortDescription = bcItem.custom_fields.ottseriesdescription;
+  seriesObject.tags = bcItem.custom_fields.ottserieskeywords;
+  seriesObject.title = bcItem.custom_fields.ottseriesname;
+  seriesObject.genres = bcItem.custom_fields.ottseriesgeneres;
+  seriesObject.thumbnail = bcItem.images.thumbnail.src;
   return seriesObject;
 }
 
 const createRokuFeed = (bcObject) => {
-  let rokuFeed = {"providerName": "TVO", "language": "en-US"};
-  bcObject.forEach((bcItem) => { //For each video...
+  let rokuFeed = {"providerName": "TVO", "language": "en-US"}; //Add last updated
 
-    try{
-
-      //Series with seasosns
-      if(bcItem.custom_fields.otttype === "series with seasons") {
-        let videoObject = createRokuVideo(bcItem);
-        if(!rokuFeed.hasOwnProperty("series")) {
-          let seriesObject = createRokuSeries(bcObject, bcItem);
-          rokuFeed.series = [{...seriesObject, "seasons":[{"seasonNumber": bcItem.custom_fields.ottseasonnumber, "episodes": [{...videoObject}]}]}];
-        }else{
-          let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.ottseriesname) //Check if series INDEX exists
-          if(rokuSeriesIndex === -1) { //If series does not exist...
-            let seriesObject = createRokuSeries(bcObject, bcItem);
-            rokuFeed.series.push({...seriesObject, "seasons":[{"seasonNumber": bcItem.custom_fields.ottseasonnumber, "episodes": [{...videoObject}]}]}); //PUSH series/season/episode
-          }else{ //If the series exists...
-            let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber === bcItem.custom_fields.ottseasonnumber) //Check if season INDEX exists
-            if(rokuSeasonIndex === -1) { //If the season does not exist...
-                rokuFeed.series[rokuSeriesIndex].seasons.push({"seasonNumber": bcItem.custom_fields.ottseasonnumber, "episodes": [{...videoObject}]});//PUSH season/episode
-              }else{ //If the season exists...
-                rokuFeed.series[rokuSeriesIndex].seasons[rokuSeasonIndex].episodes.push({...videoObject}); //PUSH episode
-              }
-          }
+  //Series with seasons
+  if(bcObject.hasOwnProperty("series with seasons")) {
+    bcObject["series with seasons"].forEach((bcItem) => { //For each video...
+      let videoObject = createRokuVideo(bcItem);
+      if(!rokuFeed.hasOwnProperty("series")) {rokuFeed.series = []}
+      let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.ottseriesname) //For each bc video, check if series INDEX exists in the Roku array
+      if(rokuSeriesIndex === -1) { //If series does not exist...
+        let seriesObject = createRokuSeries(bcItem);
+        rokuFeed.series.push({...seriesObject, "seasons":[{"seasonNumber": bcItem.custom_fields.ottseasonnumber, "episodes": [{...videoObject}]}]}); //PUSH series/season/episode to Rocku
+      }else{ //If the series does exist...
+        let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber === bcItem.custom_fields.ottseasonnumber) //Check if season INDEX exists
+        if(rokuSeasonIndex === -1) { //If the season does not exist...
+          rokuFeed.series[rokuSeriesIndex].seasons.push({"seasonNumber": bcItem.custom_fields.ottseasonnumber, "episodes": [{...videoObject}]});//PUSH season/episode to Roku
+        }else{ //If the season does exist...
+          rokuFeed.series[rokuSeriesIndex].seasons[rokuSeasonIndex].episodes.push({...videoObject}); //PUSH episode to Roku
         }
-        
-      //Series without seasons
-      }else if(bcItem.custom_fields.otttype === "series without seasons") {
-        let videoObject = createRokuVideo(bcItem);
-        if(!rokuFeed.hasOwnProperty("series")) {
-          let seriesObject = createRokuSeries(bcObject, bcItem);
-          rokuFeed.series = [{...seriesObject, "episodes": [{...videoObject}]}];
-        }else{
-          let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.ottseriesname) //Check if series INDEX exists
-          if(rokuSeriesIndex === -1) { //If series does not exist...
-            let seriesObject = createRokuSeries(bcObject, bcItem);
-            rokuFeed.series.push({...seriesObject, "episodes": [{...videoObject}]}); //PUSH series/season/episode
-          }else{ //If the series exists...
-            rokuFeed.series[rokuSeriesIndex].episodes.push({...videoObject}); //PUSH episode
-          }
-        }
-
-      //Movies
-      }else if(bcItem.custom_fields.otttype === "movies"){
-        let videoObject = createRokuVideo(bcItem);
-        if(!rokuFeed.hasOwnProperty("movies")) {rokuFeed["movies"] = []}
-        rokuFeed["movies"].push({...videoObject}); //PUSH movie to Roku
-
-      //TV specials
-      }else if(bcItem.custom_fields.otttype === "tv specials") {
-        let videoObject = createRokuVideo(bcItem);
-        if(!rokuFeed.hasOwnProperty("tvSpecials")) {rokuFeed["tvSpecials"] = []}
-        rokuFeed["tvSpecials"].push({...videoObject}); //PUSH tv special to Roku
       }
+    })
+  }
 
-    }catch(error){
-      console.error(error);
-    }
+  //Series without seasons
+  if(bcObject.hasOwnProperty("series without seasons")) {
+    bcObject["series without seasons"].forEach((bcItem) => { //For each video...
+      let videoObject = createRokuVideo(bcItem);
+      if(!rokuFeed.hasOwnProperty("series")) {rokuFeed.series = []}
+      let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.ottseriesname) //For each bc video, check if series INDEX exists in the Roku array
+      if(rokuSeriesIndex === -1) { //If series does not exist...
+        let seriesObject = createRokuSeries(bcItem);
+        rokuFeed.series.push({...seriesObject, "episodes": [{...videoObject}]}); //PUSH series/season/episode to Rocku
+      }else{ //If the series does exist...
+        rokuFeed.series[rokuSeriesIndex].episodes.push({...videoObject}); //PUSH episode to Roku
+      }
+    })
+  }
 
-  }) //End looping thru Brightcove videos
-  return rokuFeed;//This could return an empty Roku feed if all tasks fail
+  //Movies
+  if(bcObject.hasOwnProperty("movies")) {
+    bcObject["movies"].forEach((bcItem) => { //For each Brightcove video
+      let videoObject = createRokuVideo(bcItem);
+      if(!rokuFeed.hasOwnProperty("movies")) {rokuFeed.movies = []}
+      rokuFeed.movies.push(videoObject); //PUSH movie to Roku
+    })
+  }
 
+  //TV Specials
+  if(bcObject.hasOwnProperty("tv specials")) {
+    bcObject["tv specials"].forEach((bcItem) => { //For each video...
+      let videoObject = createRokuVideo(bcItem);
+      if(!rokuFeed.hasOwnProperty("tvSpecials")) {rokuFeed.tvSpecials = []}
+      rokuFeed.tvSpecials.push(videoObject); //PUSH tv special to Roku
+    })
+  }
+
+  return rokuFeed;
 }
 
 const writeRokuFeed = (rokuFeed) => {
@@ -229,7 +250,9 @@ const tempCron = async () => {
   console.log("CRON triggered");
   let bcVideos = await getBrightcoveVideos(18140038001);
   let bcSourcedVideos = await getBrightcoveSource(bcVideos);
-  let rokuFeed = createRokuFeed(dummyBcSourcedVideos);
+  let bcFilteredVideos = filterBrightcoveVideos(dummyBcSourcedVideos);
+  bcFilteredVideos["series with seasons"].sort(sortBrightcoveVideos);
+  let rokuFeed = createRokuFeed(bcFilteredVideos);
   writeRokuFeed(rokuFeed);
 }
 
