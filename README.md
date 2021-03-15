@@ -8,7 +8,7 @@ Videos are hosted on Brightcove...
 
 ### PROJECT CONSTRAINTS
 
-- Users will schedule (CMS) videos by changing values in BC custom fields. At out request, BC added 10 additional custom fields.
+- Users will schedule (CMS) videos by changing values in BC custom fields. At our request, BC added 10 additional custom fields.
 - We will not use CPAD because it does not have a roku live/not live flag or video URLs so we would still need to call BC. Calling both is overly complex.
 - We have to make multiple calls to Brightcove: oauth, videos, and sources. Sources is the only place we can get the video URL.
 - We can only get max of 100 videos at a time and max of only 1 source at a time.
@@ -17,9 +17,9 @@ Videos are hosted on Brightcove...
 - Users will not be able to upload series images on their own. We will have to do it for them. This is because there will be no front end for uploading images.
 - Brightcove URLs expire. At our request, they have extended the expiry time from 6 hrs to 7 days.
 - Agenda eps are in segments. Roku has no concept of segments.
-- We will need to call different Brightcove accounts in the same Roku channel.
+- We will need 2 feeds, one for TVO and one for TVOKids.
 - Ownership is set at the channel level, NOT the series or video level!
-- Pub/kill dates are the same for Roku as they are for web sites. These are set in the feed, under Content.  
+- Pub/kill dates are the same for Roku as they are for our web sites. These are set in the feed for each video.
 - Roku Direct Publisher is slow to update which makes it slow to test and trouble shoot.
 - We cannot use the BC Playback API, which is much simpler. See constraints below.
 - We cannot use the BC Social Syndication API, which is much simpler. See contstraints below.
@@ -54,54 +54,63 @@ Videos are hosted on Brightcove...
 
 ### PROPOSED BC CUSTOM FIELDS (Display name / Internal name / Data type / TS XML field / Description)
 
-- OTT Flag / ottflag / restricted list: true, false  / NA / Controls whether this vidoe appears on OTT platforms or not. Leaving this field blank is the same as choosing false.
-- OTT Type / otttype / restricted list: series, movie, shortFormVideo, tvSpecial / NA
-- OTT Series Number / ottseriesnumber / text / TBD
-- OTT Series Name / ottseriesname / text / TBD
-- OTT Series Description / ottseriesdescription / text / TBD
-- OTT Series Keywords / ottserieskeywords / text: comma separated list / NA
-- OTT Series Genres / ottseriesgenres / text: comma separated list / NA
-- OTT Series Release Date / ottseriesreleasedate / text / TBD
-- OTT Season Number / ottseasonnumber / text / SeasonNumber
-- OTT Episode Number / ottepisodenumber / text / EPISODE_ORDER
+- OTT Episode Number / ott_episode_number / restricted list: 1,2,3...20 / EPISODE_ORDER / The episode number for this video. Only required when OTT Type = "series...".
+- OTT Flag / ott_flag / restricted list: true, false  / NA / Controls whether this video appears on Roku or not. Leaving this field blank is the same as choosing false.
+- OTT Genres / ott_series_genres / text: comma separated list / NA / Comma sepated list of genres. Only values from Roku's restricted list are allowed. Required if OTT Type = "movies" or "tv shows". Only required on the first episode of a series if OTT Type = "series...".
+- OTT Rating / ott_rating / text / AgeRating / The rating for the video content. See Roku documentation for list of allowed values.
+- OTT Release Date / ott_release_date / text: YYYY-MM-DD / AirDate / YYYY-MM-DD. Used by Roku to sort programs chronologically and generate the “Recently Added” category.
+- OTT Season Number / ott_season_number / restricted list: 1,2,3...20 / SeasonNumber / The season number for this video. Only required on first episode of a series when OTT Type = "series with seasons".
+- OTT Series Description / ott_series_description / text / ShortDescription / A description of the series that does not exceed 200 characters. The text will be clipped if longer. Only required on the first episode of a series if OTT Type = "series...".
+- OTT Series Name / ott_series_name / text / SeriesTitle / The title of the series in plain text. This field is used for matching in Roku Search. Do not include extra information such as year, version, and so on. Only required on the first episode of a series if OTT Type = "series...".
+- OTT Series Number / ott_series_number / text / TVOSeries / A unique identifier for this series that does not exceed 50 characters. Only required on the first episode of a series if OTT Type = "series...".
+- OTT Tags / ott_series_tags / text: comma separated list / NA / Comma separated list of tags for this series (for example: dramas,docs,news). Each tag is limited to 20 characters. Tags are used to define what content will be shown within a category. Required if OTT Type = "movies" or "tv shows". Only required on the first episode of a series if OTT Type = "series...".
+- OTT Type / ott_type / restricted list: series with seasons, series without seasons, movies, tvSpecials / Controls how this video appears on Roku. See Roku documentation for more details.
 
-### ROKU SERIES OBJECT
+### ROKU CONTAINER OBJECTS
 
-- Series         { id, title, thumb, shortDescript, longDescription, releaseDate, genres, tags, seasons[]  }
-- Series         { id, title, thumb, shortDescript, longDescription, releaseDate, genres, tags, episodes[] }
-- seasons        {seasonNumber, episodes[] }
+- Series w/ seasons      { id, title, thumb, shortDescript, longDescription, releaseDate, genres, tags, seasons[]  }
+- Series w/out seasons   { id, title, thumb, shortDescript, longDescription, releaseDate, genres, tags, episodes[] }
+- seasons                { seasonNumber, episodes[] }
 
-### ROKU VIDEO OBJECT
+### ROKU VIDEO OBJECTS
 
-- Movie          { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, genres, tags }
-- tvSpecial      { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, genres, tags }
-- shortFormVideo { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, genres, tags }
-- episode        { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, episodeNumber }
-- content { dateAdded, duration, language, validityPeriodStart, validityPeriodEnd, videos{}, captions{} }
-- video { url, quality, videoType }
-- captions {url, language, captionType}
+- episode                { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, episodeNumber }
+- Movie                  { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, genres, tags }
+- tvSpecial              { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, genres, tags }
+- shortFormVideo         { id, title, thumb, shortDescript, longDescription, releaseDate, content{}, ratings, genres, tags }
+
+### OTHER ROKU OBJECTS
+
+- content    { dateAdded, duration, language, validityPeriodStart, validityPeriodEnd, videos{}, captions{} }
+- video      { url, quality, videoType }
+- captions   {url, language, captionType}
 
 ### QUESTIONS
 
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 
 ### TO DO
-- Error handling
-- BC CMS API creds should be read only
-- Handle multiple bc accounts
-- Handle multiple content types
-- Upload series image files and serve them
 - Add and populate BC custom fields
+- Add error handling on thumbs and text tracks.
+- Add retry x3 and error handling on write to file.
+- Handle multiple bc accounts
+- Upload series image files and serve them
+- Decide if error handling needed on any other fields.
+- Add: If ott type not series, include genres and tags in video object.
+- BC CMS API creds should be read only
 - Add ability to manually trigger script on demand
-- Map all bc fields to Roku feed
+- Audit mapping of all bc fields to Roku feed
+- Check out how we handle dates
 - Search by complete, shedule.starts_at, schedule-ends_at, roku, state
-- Captions
 - Logging
-- Re-tries
-- Rate limiting
-- Add series metadata to roku feed, pulling from ep 1 video only
-
-
+- Confirm re-tries are working
+- Confirm rate limiting is working
+- Confirm series metadata is pulling from ep 1 video only
+- Is AgeRating appropriate for the ratings field?
+- Is first air appropriate for releaseDate and dateAdded?
+- Need to format generes and tags into arrays
+- Need decision: script fails with any error, script skips only video that has error
+- Need decision: script create feed if array empty, skip write to file if array empty
 
 ### WHERE TO STORE SERIES INFO (* indicates chosen option)
 
@@ -112,17 +121,11 @@ CPAD programs: requires more complexity, would still need to call BC for URL and
 
 ### ERROR HANDLING (retry, log, notify)
 
-GET VIDEOS
-- Get next 100 bc videos: try{API call}catch{retry x3, log, skip}
-- Get bc source: try{API call}catch{retry x3, log, skip}
-- Push video to bc video array: try{validate video fields, throw error}catch{log, skip}
-- Sort bc videos
-
-CREATE ROKU FEED
-- try{if bc video array is empty throw error else push videos to Roku array}catch{log error, skip}
-- Write roku array to file: try{}catch{retry x3, log}
-- All other errors use gloabl catch
-- For any error, send email: "There was an error. Please checks log"
+- Get next 100 videos: retry x3, log error
+- Get bc source: retry x3, log error
+- Create video and series objects: log error
+- Write to feed: retry x3, log error
+- Notify user of any errors
 
 ### CMS API ENDPOINTS
 
