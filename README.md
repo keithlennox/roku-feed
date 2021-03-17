@@ -54,12 +54,12 @@ Videos are hosted on Brightcove...
 
 ### PROPOSED BC CUSTOM FIELDS (Display name / Internal name / Data type / TS XML field / Description)
 
-- OTT Episode Number / ott_episode_number / restricted list: 1,2,3...20 / EPISODE_ORDER / The episode number for this video. Only required when OTT Type = "series...".
+- OTT Episode Number / ott_episode_number / text / EPISODE_ORDER / The episode number for this video. Only required when OTT Type = "series...".
 - OTT Flag / ott_flag / restricted list: true, false  / NA / Controls whether this video appears on Roku or not. Leaving this field blank is the same as choosing false.
 - OTT Genres / ott_series_genres / text: comma separated list / NA / Comma sepated list of genres. Only values from Roku's restricted list are allowed. Required if OTT Type = "movies" or "tv shows". Only required on the first episode of a series if OTT Type = "series...".
 - OTT Rating / ott_rating / text / AgeRating / The rating for the video content. See Roku documentation for list of allowed values.
 - OTT Release Date / ott_release_date / text: YYYY-MM-DD / AirDate / YYYY-MM-DD. Used by Roku to sort programs chronologically and generate the “Recently Added” category.
-- OTT Season Number / ott_season_number / restricted list: 1,2,3...20 / SeasonNumber / The season number for this video. Only required on first episode of a series when OTT Type = "series with seasons".
+- OTT Season Number / ott_season_number / text / SeasonNumber / The season number for this video. Only required on first episode of a series when OTT Type = "series with seasons".
 - OTT Series Description / ott_series_description / text / ShortDescription / A description of the series that does not exceed 200 characters. The text will be clipped if longer. Only required on the first episode of a series if OTT Type = "series...".
 - OTT Series Name / ott_series_name / text / SeriesTitle / The title of the series in plain text. This field is used for matching in Roku Search. Do not include extra information such as year, version, and so on. Only required on the first episode of a series if OTT Type = "series...".
 - OTT Series Number / ott_series_number / text / TVOSeries / A unique identifier for this series that does not exceed 50 characters. Only required on the first episode of a series if OTT Type = "series...".
@@ -91,26 +91,28 @@ Videos are hosted on Brightcove...
 
 ### TO DO
 - Add and populate BC custom fields
-- Add error handling on thumbs and text tracks.
-- Add retry x3 and error handling on write to file.
+- Add error handling on thumbs and text tracks
+- Retry x3 and error handling on write to file
+- Do not write a feed to file smaller than x
 - Handle multiple bc accounts
-- Upload series image files and serve them
-- Decide if error handling needed on any other fields.
-- Add: If ott type not series, include genres and tags in video object.
+- Upload series image files and update thumb urls in code
+- Check for 2 digit integer on season number
+- Pub/kill dates are correct format for Roku
+- Is error handling needed on any other fields?
+- Search by flag=roku + state=ACTIVE
+- QUESTION: What is the hard coded value for rating type?
+- QUESTION: Is AgeRating appropriate for the ratings field
+- QUESTION: Is first air appropriate for releaseDate and dateAdded
+- QUESTION: Are season and ep numbers populated in TS
 - BC CMS API creds should be read only
-- Add ability to manually trigger script on demand
-- Audit mapping of all bc fields to Roku feed
-- Check out how we handle dates
-- Search by complete, shedule.starts_at, schedule-ends_at, roku, state
-- Logging
-- Confirm re-tries are working
-- Confirm rate limiting is working
-- Confirm series metadata is pulling from ep 1 video only
-- Is AgeRating appropriate for the ratings field?
-- Is first air appropriate for releaseDate and dateAdded?
-- Need to format generes and tags into arrays
-- Need decision: script fails with any error, script skips only video that has error
-- Need decision: script create feed if array empty, skip write to file if array empty
+- AWS: Error logging + notifications
+- AWS: Ability to manually trigger script on demand
+- Correct formatting of dates in releaseDate and dateAdded - COMPLETE
+- Format generes and tags into arrays - COMPLETE
+- Re-tries - COMPLETE
+- Rate limiting - COMPLETE
+- Series metadata pulls from ep 1 video only - COMPLETE
+- If ott type not series, include genres and tags in video object - COMPLETE
 
 ### WHERE TO STORE SERIES INFO (* indicates chosen option)
 
@@ -121,10 +123,13 @@ CPAD programs: requires more complexity, would still need to call BC for URL and
 
 ### ERROR HANDLING (retry, log, notify)
 
-- Get next 100 videos: retry x3, log error
-- Get bc source: retry x3, log error
-- Create video and series objects: log error
-- Write to feed: retry x3, log error
+Script try/catches any error, script skips only video that has error.  
+
+- Get next 100 videos: try/catch any error, log error, retry 3x, after 3rd attempt skip to next 100 videos
+- Get bc source: try/catch any error, log error, retry 3x, after 3rd attempt skip to next source
+- Create video and series objects: try/catch any error, log error + skip to next video
+- Create feed: no error handling
+- Write to feed: throw error if json object samller than x, try/catch any error, log error, retry 3x, after 3rd attempt do not update feed
 - Notify user of any errors
 
 ### CMS API ENDPOINTS
