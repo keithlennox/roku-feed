@@ -127,8 +127,8 @@ const createRokuVideo = (bcItem) => {
     })
   }
   if(bcItem.custom_fields.ott_type === "movies" || bcItem.custom_fields.ott_type === "tv specials") {
-    videoObject.genres = bcItem.custom_fields.ott_genres.split(","); //Need to strip whitespace
-    videoObject.tags = bcItem.custom_fields.ott_tags.split(","); //Need to strip whitespace
+    videoObject.genres = bcItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
+    videoObject.tags = bcItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
   }
   bcItem.images.thumbnail.sources.forEach((source) => {
     if(source.src.startsWith("https://")) {
@@ -136,8 +136,12 @@ const createRokuVideo = (bcItem) => {
     }
   }) 
   videoObject.releaseDate = bcItem.ott_release_date; //YYYY-MM-DD. Used to sort programs chronologically and group related content in Roku Search.
-  if(bcItem.custom_fields.ott_type === "series with seasons" || "series without seasons") {
-    videoObject.episodeNumber = bcItem.custom_fields.ott_episode_number;
+  if(bcItem.custom_fields.ott_type === "series with seasons" || bcItem.custom_fields.ott_type === "series without seasons") {
+    if(bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) { //Must be a 1 or 2 digit positive integer that does not lead with zero
+      videoObject.episodeNumber = bcItem.custom_fields.ott_episode_number;
+    }else {
+      throw new ReferenceError("Episode number is not formatted correctly");
+    } 
   }
   videoObject.shortDescription = bcItem.description;
   videoObject.longDescription = bcItem.long_description;
@@ -163,9 +167,9 @@ let createRokuSeries = (bcObject, bcItem) => {
   seriesObject.id = bcSeriesItem.custom_fields.ott_series_number;
   seriesObject.releaseDate = bcSeriesItem.custom_fields.ott_release_date;
   seriesObject.shortDescription = bcSeriesItem.custom_fields.ott_series_description;
-  seriesObject.tags = bcSeriesItem.custom_fields.ott_tags.split(","); //Need to strip whitespace
+  seriesObject.tags = bcSeriesItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
   seriesObject.title = bcSeriesItem.custom_fields.ott_series_name;
-  seriesObject.genres = bcSeriesItem.custom_fields.ott_genres.split(","); //Need to strip whitespace
+  seriesObject.genres = bcSeriesItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
   seriesObject.thumbnail = bcSeriesItem.images.thumbnail.src;
   return seriesObject;
 }
