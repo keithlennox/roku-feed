@@ -75,7 +75,18 @@ exports.createRokuVideo = (bcItem) => {
   videoObject.ratings = {"rating": bcItem.custom_fields.ott_rating, "ratingSource": "CPR"} //Need to confirm if Telescope AgeRating field is appropriate
   return videoObject;
 }
-  
+
+//Create Roku season object
+exports.createRokuSeason = (bcItem) => {
+  let seasonObject = {};
+  if(bcItem.custom_fields.ott_season_number.match(/^[1-9][0-9]{0,1}$/)) { //Must be a 1 or 2 digit positive integer that does not lead with zero
+    seasonObject.seasonNumber = bcItem.custom_fields.ott_season_number;
+  }else {
+    throw new ReferenceError("Season number is not formatted correctly for video " + bcItem.id);
+  } 
+  return seasonObject;
+}
+
 //Create Roku series object
 //Accepts a Brightcove video object and an array containing all Brightcove video objects
 //Retruns the Roku series object
@@ -97,6 +108,6 @@ exports.createRokuSeries = (bcObject, bcItem) => {
   seriesObject.tags = bcSeriesItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
   seriesObject.title = bcSeriesItem.custom_fields.ott_series_name;
   seriesObject.genres = bcSeriesItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
-  seriesObject.thumbnail = bcSeriesItem.images.thumbnail.src;
+  seriesObject.thumbnail = bcSeriesItem.images.thumbnail.src; //REPLACE THIS WITH REAL SERIES THUMB!!
   return seriesObject;
 }

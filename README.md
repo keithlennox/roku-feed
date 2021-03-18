@@ -91,23 +91,24 @@ Videos are hosted on Brightcove...
 
 ### TO DO
 - Add and populate BC custom fields
-- Add error handling on thumbs and text tracks
 - Retry x3 and error handling on write to file
 - Do not write a feed to file smaller than x
 - Handle multiple bc accounts
 - Upload series image files and update thumb urls in code
-- Check for 2 digit integer on season number
 - Pub/kill dates are correct format for Roku
 - Errors should contain account and video id
 - Is error handling needed on any other fields?
 - Search by flag=roku + state=ACTIVE
+- BC CMS API creds should be read only
 - QUESTION: What is the hard coded value for rating type?
 - QUESTION: Is AgeRating appropriate for the ratings field
 - QUESTION: Is first air appropriate for releaseDate and dateAdded
 - QUESTION: Are season and ep numbers populated in TS
-- BC CMS API creds should be read only
 - AWS: Error logging + notifications
 - AWS: Ability to manually trigger script on demand
+- Check for 2 digit integer on season number - COMPLETE
+- Create separate function folder/files - COMPLETE
+- Add error handling on thumbs and text tracks - COMPLETE
 - Correct formatting of dates in releaseDate and dateAdded - COMPLETE
 - Format generes and tags into arrays - COMPLETE
 - Re-tries - COMPLETE

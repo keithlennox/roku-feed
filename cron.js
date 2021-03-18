@@ -1,7 +1,7 @@
 var fs = require('fs');
 const cron = require('node-cron');
 const { getBrightcoveVideos, getBrightcoveSource } = require('./functions/brightcove');
-const { createRokuVideo, createRokuSeries } = require('./functions/roku');
+const { createRokuSeries, createRokuSeason, createRokuVideo } = require('./functions/roku');
 const dummyBcSourcedVideos = require('./data.json')
 
 console.log('Hello from the CRON!')
@@ -17,19 +17,22 @@ const createRokuFeed = (bcObject) => {
         let videoObject = createRokuVideo(bcItem);
         if(!rokuFeed.hasOwnProperty("series")) {
           let seriesObject = createRokuSeries(bcObject, bcItem);
-          rokuFeed.series = [{...seriesObject, "seasons":[{"seasonNumber": bcItem.custom_fields.ott_season_number, "episodes": [{...videoObject}]}]}];
+          let seasonObject = createRokuSeason(bcItem);
+          rokuFeed.series = [{...seriesObject, "seasons":[{...seasonObject, "episodes": [{...videoObject}]}]}];
         }else{
           let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.ott_series_name) //Check if series INDEX exists
           if(rokuSeriesIndex === -1) { //If series does not exist...
             let seriesObject = createRokuSeries(bcObject, bcItem);
-            rokuFeed.series.push({...seriesObject, "seasons":[{"seasonNumber": bcItem.custom_fields.ott_season_number, "episodes": [{...videoObject}]}]}); //PUSH series/season/episode
+            let seasonObject = createRokuSeason(bcItem);
+            rokuFeed.series.push({...seriesObject, "seasons":[{...seasonObject, "episodes": [{...videoObject}]}]}); //PUSH series/season/episode
           }else{ //If the series exists...
             let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber === bcItem.custom_fields.ott_season_number) //Check if season INDEX exists
             if(rokuSeasonIndex === -1) { //If the season does not exist...
-                rokuFeed.series[rokuSeriesIndex].seasons.push({"seasonNumber": bcItem.custom_fields.ott_season_number, "episodes": [{...videoObject}]});//PUSH season/episode
-              }else{ //If the season exists...
-                rokuFeed.series[rokuSeriesIndex].seasons[rokuSeasonIndex].episodes.push({...videoObject}); //PUSH episode
-              }
+              let seasonObject = createRokuSeason(bcItem);
+              rokuFeed.series[rokuSeriesIndex].seasons.push({...seasonObject, "episodes": [{...videoObject}]});//PUSH season/episode
+            }else{ //If the season exists...
+              rokuFeed.series[rokuSeriesIndex].seasons[rokuSeasonIndex].episodes.push({...videoObject}); //PUSH episode
+            }
           }
         }
         
