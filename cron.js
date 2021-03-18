@@ -90,6 +90,18 @@ const getBrightcoveSource = async (bcVideos) => {
   return bcVideos;
 } //End function
 
+
+const getBrightcoveCaptions = (bcItem) => {
+  if(bcItem.text_tracks.length != 0) {
+    let text_track = bcItem.text_tracks.find((item)=> item.kind === "captions");
+    if(text_track) {
+      let url = text_track.sources.find((item2) => item2.src.startsWith("https://"))
+      if(url) {return url.src;}
+    }
+  }
+  throw new ReferenceError("Caption file not found for video " + bcItem.id);
+}
+
 /*All fields used in all videos objects (series with seasons, series without seasons, movies, tv specials), except:
 generes: movies and tv shows only
 tags: movies and tv shows only
@@ -115,17 +127,7 @@ const createRokuVideo = (bcItem) => {
   videoObject.content.captions = {};
   videoObject.content.captions.language = "en";
   videoObject.content.captions.captionType = "CLOSED_CAPTION";
-  if(bcItem.text_tracks.length != 0) {
-    bcItem.text_tracks.forEach((text_track) => {
-      if(text_track.kind === "captions") {
-        text_track.sources.forEach((source) => {
-          if(source.src.startsWith("https://")) {
-            videoObject.content.captions.url = source.src //Should throw error if cc not found
-          }
-        })
-      }
-    })
-  }
+  videoObject.content.captions.url = getBrightcoveCaptions(bcItem);
   if(bcItem.custom_fields.ott_type === "movies" || bcItem.custom_fields.ott_type === "tv specials") {
     videoObject.genres = bcItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
     videoObject.tags = bcItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array

@@ -98,6 +98,7 @@ Videos are hosted on Brightcove...
 - Upload series image files and update thumb urls in code
 - Check for 2 digit integer on season number
 - Pub/kill dates are correct format for Roku
+- Errors should contain account and video id
 - Is error handling needed on any other fields?
 - Search by flag=roku + state=ACTIVE
 - QUESTION: What is the hard coded value for rating type?
@@ -176,3 +177,4 @@ https://apis.support.brightcove.com/playback/code-samples/playback-api-sample-js
 https://github.com/registerguard/brightcove-cms-api-php-rss  
 https://www.toptal.com/nodejs/node-js-error-handling  
 https://gomakethings.com/sorting-an-array-by-multiple-criteria-with-vanilla-javascript  
+https://stackoverflow.com/questions/10834796/validate-that-a-string-is-a-positive-integer  
