@@ -18,6 +18,19 @@ const getBrightcoveCaptions = (bcItem) => {
   throw new ReferenceError("Caption file not found for video " + bcItem.id);
 }
 
+//Get Brightcove thumbnail
+//Accepts a Brightcove video object
+//Returns the thumbnail url
+const getBrightcoveThumb = (bcItem) => {
+  if(bcItem.images.thumbnail.sources.length != 0) {
+    let url = bcItem.images.thumbnail.sources.find((source) => source.src.startsWith("https://"))
+    if(url) {
+      return url.src;
+    }
+  }
+  throw new ReferenceError("Thumbnail file not found for video " + bcItem.id);
+}
+
 //Create Roku video object
 //Accepts a Brightcove video object
 //Retruns a Roku video object
@@ -30,8 +43,8 @@ exports.createRokuVideo = (bcItem) => {
   videoObject.content.dateAdded = `${bcItem.custom_fields.ott_release_date}T08:00:00+04:00`; //YYYY-MM-DDTHH:MM:SS+HH:MM. Used to generate the “Recently Added” category. Everything is relased 8 or 9 AM Toronto time.
   videoObject.content.duration = Math.round(bcItem.duration / 1000); //Brightcove returns miliseconds. Roku requires seconds and must be an integer.
   videoObject.content.language = "en-us";
-  videoObject.content.validityPeriodStart = bcItem.schedule.starts_at;
-  videoObject.content.validityPeriodEnd = bcItem.schedule.ends_at;
+  videoObject.content.validityPeriodStart = bcItem.schedule.starts_at; //Must confirm format is OK for Roku
+  videoObject.content.validityPeriodEnd = bcItem.schedule.ends_at; //Must confirm format is OK for Roku
   videoObject.content.videos = {};
   videoObject.content.videos.videoType = "HLS";
   if(bcItem.video_url) {
@@ -48,11 +61,7 @@ exports.createRokuVideo = (bcItem) => {
     videoObject.genres = bcItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
     videoObject.tags = bcItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
   }
-  bcItem.images.thumbnail.sources.forEach((source) => {
-    if(source.src.startsWith("https://")) {
-      videoObject.thumbnail = source.src //Should throw error if cc not found
-    }
-  }) 
+  videoObject.thumbnail = getBrightcoveThumb(bcItem);
   videoObject.releaseDate = bcItem.ott_release_date; //YYYY-MM-DD. Used to sort programs chronologically and group related content in Roku Search.
   if(bcItem.custom_fields.ott_type === "series with seasons" || bcItem.custom_fields.ott_type === "series without seasons") {
     if(bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) { //Must be a 1 or 2 digit positive integer that does not lead with zero
