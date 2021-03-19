@@ -90,13 +90,13 @@ Videos are hosted on Brightcove...
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 
 ### TO DO
+- Config file? Env file? Do not commit to git.
+- Errors should contain account and video id
+- Pub/kill dates are correct format for Roku
 - Add and populate BC custom fields
 - Retry x3 and error handling on write to file
 - Do not write a feed to file smaller than x
-- Handle multiple bc accounts
 - Upload series image files and update thumb urls in code
-- Pub/kill dates are correct format for Roku
-- Errors should contain account and video id
 - Is error handling needed on any other fields?
 - Search by flag=roku + state=ACTIVE
 - BC CMS API creds should be read only
@@ -106,6 +106,9 @@ Videos are hosted on Brightcove...
 - QUESTION: Are season and ep numbers populated in TS
 - AWS: Error logging + notifications
 - AWS: Ability to manually trigger script on demand
+- Create log file - COMPLETE
+- Organize folder/files - COMPLETE (may need to be re-jigged for AWS)
+- Handle multiple bc accounts - COMPLETE
 - Check for 2 digit integer on season number - COMPLETE
 - Create separate function folder/files - COMPLETE
 - Add error handling on thumbs and text tracks - COMPLETE

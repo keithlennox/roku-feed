@@ -1,6 +1,4 @@
-/*Functions used to create various Roku rss feed components
-Errors thrown here bubble up and are caught at higher levels
-*/
+/*Functions used to create various Roku rss feed components*/
 
 //Create Roku caption url
 //Accepts a single Brightcove video object
