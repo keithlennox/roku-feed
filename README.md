@@ -90,24 +90,25 @@ Videos are hosted on Brightcove...
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 
 ### TO DO
-- Config file? Env file? Do not commit to git.
-- Errors should contain account and video id
-- Pub/kill dates are correct format for Roku
-- Add and populate BC custom fields
 - Retry x3 and error handling on write to file
-- Do not write a feed to file smaller than x
+- Do not write a feed to file smaller than 200
+- Errors should contain account and video id
+- All dates should be Roku format
 - Upload series image files and update thumb urls in code
-- Is error handling needed on any other fields?
+- Create log file should be changed to console.log()
+- Config file? Env file? Do not commit to git.
+- Is error handling needed on any other bc custom fields?
 - Search by flag=roku + state=ACTIVE
-- BC CMS API creds should be read only
+- BC CMS API creds should be re-done and made read only
+- Add and populate BC custom fields
 - QUESTION: What is the hard coded value for rating type?
-- QUESTION: Is AgeRating appropriate for the ratings field
-- QUESTION: Is first air appropriate for releaseDate and dateAdded
-- QUESTION: Are season and ep numbers populated in TS
-- AWS: Error logging + notifications
+- TS QUESTION: Is AgeRating appropriate for the ratings field?
+- TS QUESTION: Is first air appropriate for releaseDate and dateAdded?
+- TS QUESTION: Are season and ep numbers populated in TS?
+- AWS: Implement as single lambda function w/ asscoiated folders/files
+- AWS: Error logging (console.error() to std out) + notifications (yes this is possible)
 - AWS: Ability to manually trigger script on demand
-- Create log file - COMPLETE
-- Organize folder/files - COMPLETE (may need to be re-jigged for AWS)
+- Organize folder/files - COMPLETE
 - Handle multiple bc accounts - COMPLETE
 - Check for 2 digit integer on season number - COMPLETE
 - Create separate function folder/files - COMPLETE
