@@ -90,13 +90,3 @@ exports.createRokuFeed = (bcObject) => {
       if (error) throw error;
     });
   }
-
-  //Write to log
-  exports.writeLog = (account, found, count) => {
-    console.log("Writing to log");
-    let timestamp = new Date().toLocaleString();
-    let string = `${timestamp} - account: ${account} found: ${found} added: ${count} \r\n`;
-    fs.appendFile("./cron.log", string, (error) => {
-      if (error) throw error;
-    });
-  }
