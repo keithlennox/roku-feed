@@ -1,7 +1,12 @@
 const { getBrightcoveVideos, getBrightcoveSource } = require('./scripts/brightcove');
-const { createRokuFeed, writeRokuFeed, writeLog} = require('./scripts/rokuFeed.js');
+const { createRokuFeed, writeRokuFeed } = require('./scripts/rokuFeed.js');
 
-const createRokuFeeds = async (account) => {
+//exports.handler = async (event) => {
+const handler = async () => { //For local testing only, in prod use exports.handler
+
+  //For local testing only, in prod these values will come from the AWS event object
+  const account = 18140038001; //TVO
+  //const account = 15364602001; //TVOKIDS
 
   //Get Brightcove videos where ott_flag = roku
   let bcVideos = await getBrightcoveVideos(account);
@@ -20,6 +25,4 @@ const createRokuFeeds = async (account) => {
   console.log(`${timestamp} - account: ${account} found: ${bcVideos.length} added: ${rokuFeed.count}`);
 }
 
-//TVO = 18140038001
-//TVOKIDS = 15364602001
-createRokuFeeds(18140038001); //A CRON job will trigger this
+handler(); //For local testing only, in prod AWS EventBridge will triiger our handler function
