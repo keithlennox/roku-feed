@@ -1,4 +1,3 @@
-const cron = require('node-cron');
 const { getBrightcoveVideos, getBrightcoveSource } = require('./scripts/brightcove');
 const { createRokuFeed, writeRokuFeed, writeLog} = require('./scripts/rokuFeed.js');
 
