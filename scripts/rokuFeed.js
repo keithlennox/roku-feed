@@ -79,7 +79,7 @@ exports.createRokuFeed = (bcObject) => {
   }
   
   // Write Roku feed to local file. Used for local testing only.
-  exports.writeRokuFeed = async (rokuFeed, account) => {
+  exports.writeRokuFeed = (rokuFeed, account) => {
     let feedName;
     if(account === 18140038001) {
       feedName = "tvo";
@@ -94,7 +94,7 @@ exports.createRokuFeed = (bcObject) => {
   }
 
   // Write Roku feed to S3 bucket
-  // exports.writeRokuFeed = (rokuFeed, account) => {
+  // exports.writeRokuFeed = async (rokuFeed, account) => {
   //   let folder;
   //   if(account === 18140038001) {
   //     folder = "tvo";
