@@ -48,7 +48,7 @@ exports.getBrightcoveVideos = async (account) => {
   //const search = "tags:roku";
   const search = "ott_flag:true";
   while(counter === bcVideos.length) { //Get next 100 videos until no more are returned
-    for (i = 1; i <=3; i++) { //Retry on error
+    for (let i = 1; i <=3; i++) { //Retry on error
       try{
         console.log(counter);
         console.log(bcVideos.length);
@@ -74,7 +74,7 @@ exports.getBrightcoveVideos = async (account) => {
 exports.getBrightcoveSource = async (bcVideos) => {
   console.log("Retrieving sources");
   for(let bcVideo of bcVideos) {//For every video in the array
-    for (i = 1; i <=3; i++) { //Retry on error
+    for (let i = 1; i <=3; i++) { //Retry on error
       try{
         let options = await getToken();
         let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + bcVideo.account_id + "/videos/" + bcVideo.id + "/sources", options) //Get the sources array

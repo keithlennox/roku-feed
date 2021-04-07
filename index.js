@@ -5,8 +5,8 @@ const { createRokuFeed, writeRokuFeed } = require('./scripts/rokuFeed.js');
 const handler = async () => { //For local testing only, in prod use exports.handler
 
   //For local testing only, in prod these values will come from the AWS event object
-  const account = 18140038001; //TVO
-  //const account = 15364602001; //TVOKIDS
+  //const account = 18140038001; //TVO
+  const account = 15364602001; //TVOKIDS
 
   //Get Brightcove videos where ott_flag = roku
   let bcVideos = await getBrightcoveVideos(account);
