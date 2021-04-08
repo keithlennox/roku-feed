@@ -203,15 +203,12 @@ rokuFeed.js
 - Add this line near the top const s3 = new AWS.S3();
 - Replace the entire contents of exports.writeRokuFeed with the following:
 
-    let folder;  
+    let feedName;  
     if(account === 18140038001) {  
-        folder = "tvo";  
-    }else if(account === 15364602001) {  
-        folder = "tvokids";  
+        feedName = "tvo";  
+    }else if(account === 15364602001)  
+        feedName = "tvokids";  
     }  
-    const params = { Bucket: "ott-feeds", Key: `roku/${folder}/feed.json`, Body: `${JSON.stringify(rokuFeed)}` };  
-    try {  
-        const putResult = await s3.putObject(params).promise();  
-    }catch(error) {  
-        console.error(error);  
-    }  
+    fs.writeFile(`./public/${feedName}.json`, JSON.stringify(rokuFeed), (error) => {  
+        if (error) throw error;  
+    });  
