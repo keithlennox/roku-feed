@@ -1,10 +1,9 @@
 /*Functions used to create Roku rss feed and write it to file*/
 
-var fs = require('fs'); //Local testing only
-//const AWS = require('aws-sdk'); // No need to include this in node_modules because it's already part of AWS JS runtime
+const AWS = require('aws-sdk'); // No need to include this in node_modules because it's already part of AWS JS runtime
 const { createRokuSeries, createRokuSeason, createRokuVideo } = require('./rokuFeedObjects');
 
-//const s3 = new AWS.S3(); //Access S3 object of AWS-SDK
+const s3 = new AWS.S3(); //Access S3 object of AWS-SDK
 
 //Create Roku feed
 exports.createRokuFeed = (bcObject) => {
@@ -78,35 +77,20 @@ exports.createRokuFeed = (bcObject) => {
   
   }
   
-  // Write Roku feed to local file. Used for local testing only.
-  exports.writeRokuFeed = (rokuFeed, account) => {
-    let feedName;
-    if(account === 18140038001) {
-      feedName = "tvo";
-    }else if(account === 15364602001) 
-    {
-      feedName = "tvokids";
-    }
-    console.log("Writing feed " + feedName);
-    fs.writeFile(`./public/${feedName}.json`, JSON.stringify(rokuFeed), (error) => {
-      if (error) throw error;
-    });
-  }
-
   // Write Roku feed to S3 bucket
-  // exports.writeRokuFeed = async (rokuFeed, account) => {
-  //   let folder;
-  //   if(account === 18140038001) {
-  //     folder = "tvo";
-  //   }else if(account === 15364602001) 
-  //   {
-  //     folder = "tvokids";
-  //   }
-  //   const params = { Bucket: "ott-feeds", Key: `roku/${folder}/feed.json`, Body: `${JSON.stringify(rokuFeed)}` };
-  //   try {
-  //     const putResult = await s3.putObject(params).promise();
-  //     console.log(putResult);
-  //   }catch(error) {
-  //     console.error(error);
-  //   }
-  // }
+  exports.writeRokuFeed = async (rokuFeed, account) => {
+    let folder;
+    if(account === "18140038001") {
+      folder = "tvo";
+    }else if(account === "15364602001") 
+    {
+      folder = "tvokids";
+    }
+    const params = { Bucket: "ott-feeds", Key: `roku/${folder}/feed.json`, Body: `${JSON.stringify(rokuFeed)}` };
+    try {
+      const putResult = await s3.putObject(params).promise();
+      console.log(putResult);
+    }catch(error) {
+      console.error(error);
+    }
+  }

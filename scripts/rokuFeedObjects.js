@@ -62,7 +62,7 @@ exports.createRokuVideo = (bcItem) => {
   videoObject.thumbnail = getBrightcoveThumb(bcItem);
   videoObject.releaseDate = bcItem.ott_release_date; //YYYY-MM-DD. Used to sort programs chronologically and group related content in Roku Search.
   if(bcItem.custom_fields.ott_type === "series with seasons" || bcItem.custom_fields.ott_type === "series without seasons") {
-    if(bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) { //Must be a 1 or 2 digit positive integer that does not lead with zero
+    if(bcItem.custom_fields.ott_episode_number && bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) { //Must be a 1 or 2 digit positive integer that does not lead with zero
       videoObject.episodeNumber = bcItem.custom_fields.ott_episode_number;
     }else {
       throw new ReferenceError("Episode number is not formatted correctly for video " + bcItem.id);
@@ -77,7 +77,7 @@ exports.createRokuVideo = (bcItem) => {
 //Create Roku season object
 exports.createRokuSeason = (bcItem) => {
   let seasonObject = {};
-  if(bcItem.custom_fields.ott_season_number.match(/^[1-9][0-9]{0,1}$/)) { //Must be a 1 or 2 digit positive integer that does not lead with zero
+  if(bcItem.custom_fields.ott_season_number && bcItem.custom_fields.ott_season_number.match(/^[1-9][0-9]{0,1}$/)) { //Must be a 1 or 2 digit positive integer that does not lead with zero
     seasonObject.seasonNumber = bcItem.custom_fields.ott_season_number;
   }else {
     throw new ReferenceError("Season number is not formatted correctly for video " + bcItem.id);

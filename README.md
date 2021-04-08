@@ -4,7 +4,8 @@ Creates Direct Publisher json feed for Roku
 
 ## Details
 
-Videos are hosted on Brightcove...
+Videos are hosted on Brightcove. Code is hosted on AWS Lambda.
+To run code locally, see instructions at bottom of this readme.
 
 ### PROJECT CONSTRAINTS
 
@@ -183,3 +184,34 @@ https://github.com/registerguard/brightcove-cms-api-php-rss
 https://www.toptal.com/nodejs/node-js-error-handling  
 https://gomakethings.com/sorting-an-array-by-multiple-criteria-with-vanilla-javascript  
 https://stackoverflow.com/questions/10834796/validate-that-a-string-is-a-positive-integer  
+
+
+### RUN CODE LOCALLY
+
+This code is intended to run on AWS Lambda. To run locally, do the following:  
+
+root project folder  
+- Create public/tvo.json
+- Create tvokids.json
+
+index.js  
+- Replace exports.handler with const handler and call it with handler({"account": "15364602001"}). Change the Brightcove account number to 18140038001 as needed.
+
+rokuFeed.js  
+- Remove this line: var fs = require('fs');
+- Add this line near the top: const AWS = require('aws-sdk');
+- Add this line near the top const s3 = new AWS.S3();
+- Replace the entire contents of exports.writeRokuFeed with the following:
+
+    let folder;
+    if(account === 18140038001) {
+        folder = "tvo";
+    }else if(account === 15364602001) {
+        folder = "tvokids";
+    }
+    const params = { Bucket: "ott-feeds", Key: `roku/${folder}/feed.json`, Body: `${JSON.stringify(rokuFeed)}` };
+    try {
+        const putResult = await s3.putObject(params).promise();
+    }catch(error) {
+        console.error(error);
+    }
