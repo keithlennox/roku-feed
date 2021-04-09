@@ -38,26 +38,22 @@ exports.createRokuVideo = (bcItem) => {
   videoObject.id = bcItem.reference_id;
   videoObject.title = bcItem.name;
   videoObject.content = {};
-  videoObject.content.dateAdded = `${bcItem.custom_fields.ott_release_date}T08:00:00+04:00`; //YYYY-MM-DDTHH:MM:SS+HH:MM. Used to generate the “Recently Added” category. Everything is relased 8 or 9 AM Toronto time.
+  if(bcItem.custom_fields.ott_release_date) {videoObject.content.dateAdded = `${bcItem.custom_fields.ott_release_date}T08:00:00+04:00`;}else {throw new ReferenceError("ott_release_date missing for video" + bcItem.id);} //YYYY-MM-DDTHH:MM:SS+HH:MM. Used to generate the “Recently Added” category. Everything is relased 8 or 9 AM Toronto time.
   videoObject.content.duration = Math.round(bcItem.duration / 1000); //Brightcove returns miliseconds. Roku requires seconds and must be an integer.
   videoObject.content.language = "en-us";
   videoObject.content.validityPeriodStart = bcItem.schedule.starts_at; //Must confirm format is OK for Roku
   videoObject.content.validityPeriodEnd = bcItem.schedule.ends_at; //Must confirm format is OK for Roku
   videoObject.content.videos = {};
   videoObject.content.videos.videoType = "HLS";
-  if(bcItem.video_url) {
-    videoObject.content.videos.url = bcItem.video_url;
-  }else {
-    throw new ReferenceError("No video url found for " + bcItem.id);
-  }
+  if(bcItem.video_url) {videoObject.content.videos.url = bcItem.video_url;}else {throw new ReferenceError("No video url found for " + bcItem.id);}
   videoObject.content.videos.quality = "FHD";
   videoObject.content.captions = {};
   videoObject.content.captions.language = "en";
   videoObject.content.captions.captionType = "CLOSED_CAPTION";
   videoObject.content.captions.url = getBrightcoveCaptions(bcItem);
   if(bcItem.custom_fields.ott_type === "movies" || bcItem.custom_fields.ott_type === "tv specials") {
-    videoObject.genres = bcItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
-    videoObject.tags = bcItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
+    if(bcItem.custom_fields.ott_genres){videoObject.genres = bcItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(",");}else {throw new ReferenceError("ott_genres missing for video " + bcItem.id);}//Trim whitespace and convert string to array
+    if(bcItem.custom_fields.ott_tags){videoObject.tags = bcItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(",");}else {throw new ReferenceError("ott_tags missing for video " + bcItem.id);}//Trim whitespace and convert string to array
   }
   videoObject.thumbnail = getBrightcoveThumb(bcItem);
   videoObject.releaseDate = bcItem.ott_release_date; //YYYY-MM-DD. Used to sort programs chronologically and group related content in Roku Search.
@@ -70,7 +66,7 @@ exports.createRokuVideo = (bcItem) => {
   }
   videoObject.shortDescription = bcItem.description;
   videoObject.longDescription = bcItem.long_description;
-  videoObject.ratings = {"rating": bcItem.custom_fields.ott_rating, "ratingSource": "CPR"} //Need to confirm if Telescope AgeRating field is appropriate
+  if(bcItem.custom_fields.ott_rating) {videoObject.ratings = {"rating": bcItem.custom_fields.ott_rating, "ratingSource": "CPR"}}else {throw new ReferenceError("ott_rating missing for video " + bcItem.id);} //Need to confirm if Telescope AgeRating field is appropriate
   return videoObject;
 }
 
@@ -96,7 +92,7 @@ exports.createRokuSeries = (bcObject, bcItem) => {
       return item.custom_fields.ott_series_name === bcItem.custom_fields.ott_series_name && item.custom_fields.ott_episode_number === "1";
     }
   })
-  if(bcSeriesItem === undefined) {throw new ReferenceError(`First episode for series "${bcItem.name}" not found for video ${bcItem.id}`);}
+  if(bcSeriesItem === undefined) {throw new ReferenceError(`First episode for series "${bcItem.custom_fields.ott_series_name}" not found for video ${bcItem.id}`);}
   let seriesObject = {};
   seriesObject.thumbnail = bcSeriesItem.images.thumbnail.src; //REPLACE THIS WITH REAL SERIES THUMB!!
   seriesObject.title = bcSeriesItem.custom_fields.ott_series_name;
