@@ -1,0 +1,17 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: "ca-central-1"
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14.x
+    commands:
+      - echo Entered the install phase...
+      - npm install
+  build:
+    commands:
+      - echo Entered the build phase...
+      - echo Build started on `date`
+      - npx serverless deploy -v
