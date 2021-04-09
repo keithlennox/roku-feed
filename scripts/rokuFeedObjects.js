@@ -92,20 +92,19 @@ exports.createRokuSeries = (bcObject, bcItem) => {
   let bcSeriesItem = bcObject.find((item) => {
     if(bcItem.custom_fields.ott_type === "series with seasons") {
       return item.custom_fields.ott_series_name === bcItem.custom_fields.ott_series_name && item.custom_fields.ott_season_number === "1" && item.custom_fields.ott_episode_number === "1";
-    }else{
+    }else {
       return item.custom_fields.ott_series_name === bcItem.custom_fields.ott_series_name && item.custom_fields.ott_episode_number === "1";
     }
   })
-  if(bcSeriesItem === undefined) {
-    throw new ReferenceError("First episode for series not found for video "  + bcItem.id);
-  }
+  if(bcSeriesItem === undefined) {throw new ReferenceError(`First episode for series "${bcItem.name}" not found for video ${bcItem.id}`);}
   let seriesObject = {};
-  seriesObject.id = bcSeriesItem.custom_fields.ott_series_number;
-  seriesObject.releaseDate = bcSeriesItem.custom_fields.ott_release_date;
-  seriesObject.shortDescription = bcSeriesItem.custom_fields.ott_series_description;
-  seriesObject.tags = bcSeriesItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
-  seriesObject.title = bcSeriesItem.custom_fields.ott_series_name;
-  seriesObject.genres = bcSeriesItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
   seriesObject.thumbnail = bcSeriesItem.images.thumbnail.src; //REPLACE THIS WITH REAL SERIES THUMB!!
+  seriesObject.title = bcSeriesItem.custom_fields.ott_series_name;
+  if(bcSeriesItem.custom_fields.ott_series_name) {seriesObject.title = bcSeriesItem.custom_fields.ott_series_name;}else {throw new ReferenceError("ott_series_name missing for video "  + bcItem.id);}
+  if(bcSeriesItem.custom_fields.ott_series_number) {seriesObject.id = bcSeriesItem.custom_fields.ott_series_number;} else {throw new ReferenceError("ott_series_number missing for video "  + bcItem.id);}
+  if(bcSeriesItem.custom_fields.ott_release_date) { seriesObject.releaseDate = bcSeriesItem.custom_fields.ott_release_date;} else {throw new ReferenceError("ott_release_date missing for video "  + bcItem.id);}
+  if(bcSeriesItem.custom_fields.ott_series_description) {seriesObject.shortDescription = bcSeriesItem.custom_fields.ott_series_description;} else {throw new ReferenceError("ott_series_description missing for video "  + bcItem.id);}
+  if(bcSeriesItem.custom_fields.ott_tags) {seriesObject.tags = bcSeriesItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(",");} else {throw new ReferenceError("ott_tags missing for video "  + bcItem.id);} //Trim whitespace and convert string to array
+  if(bcSeriesItem.custom_fields.ott_genres) {seriesObject.genres = bcSeriesItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(",");} else {throw new ReferenceError("ott_genres missing for video "  + bcItem.id);} //Trim whitespace and convert string to array
   return seriesObject;
 }
