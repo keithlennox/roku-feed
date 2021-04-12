@@ -91,24 +91,23 @@ To run code locally, see instructions at bottom of this readme.
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 
 ### TO DO
-- Retry x3 and error handling on write to file
-- Do not write a feed to file smaller than 200
-- Errors should contain account and video id
 - All dates should be Roku format
-- Upload series image files and update thumb urls in code
-- Create log file should be changed to console.log()
-- Config file? Env file? Do not commit to git.
-- Is error handling needed on any other bc custom fields?
-- Search by flag=roku + state=ACTIVE
+- Finalize all console.log + console.error
+- Validate feeds (how?)
 - BC CMS API creds should be re-done and made read only
-- Add and populate BC custom fields
-- QUESTION: What is the hard coded value for rating type?
+- Search by flag=roku + state=ACTIVE
+- Error handling on write to S3: retry (is this built in?), do not write feed smaller than 200 vids
+- TS QUESTION: What is the hard coded value for rating type?
 - TS QUESTION: Is AgeRating appropriate for the ratings field?
 - TS QUESTION: Is first air appropriate for releaseDate and dateAdded?
 - TS QUESTION: Are season and ep numbers populated in TS?
-- AWS: Implement as single lambda function w/ asscoiated folders/files
-- AWS: Error logging (console.error() to std out) + notifications (yes this is possible)
-- AWS: Ability to manually trigger script on demand
+- AWS: Use gitlab / serverless framework to manage code
+- AWS: Upload series image files and update thumb urls in code
+- AWS: Will we handle BC creds in yml file? These should not be committed to git.
+- AWS: Implement CRON (trigger each feed seperately, can we provide BC account id?)
+- AWS: Manually trigger script on demand - COMPLETE
+- AWS: Pull error logs
+- Create log file should be changed to console.log() - COMPLETE
 - Organize folder/files - COMPLETE
 - Handle multiple bc accounts - COMPLETE
 - Check for 2 digit integer on season number - COMPLETE
