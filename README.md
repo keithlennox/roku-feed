@@ -91,22 +91,28 @@ To run code locally, see instructions at bottom of this readme.
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 
 ### TO DO
-- All dates should be Roku format
-- Finalize all console.log + console.error
-- Validate feeds (how?)
+- Add validation to videoObject dates (releaseDate YYYY-MM-DD)
+- Add validation to seriesObject dates (releaseDate,dateAdded YYYY-MM-DD)
+- Change stills URL code
+- Publish feed to Roku and make sure it Validates
 - BC CMS API creds should be re-done and made read only
-- Search by flag=roku + state=ACTIVE
-- Error handling on write to S3: retry (is this built in?), do not write feed smaller than 200 vids
+- AWS: Upload series image files
+- AWS: Use gitlab / serverless framework to manage code
+- AWS: Handle BC creds in yml file. These should not be committed to git.
+- AWS: Implement CRON (trigger each feed seperately, can we provide BC account id?)
 - TS QUESTION: What is the hard coded value for rating type?
 - TS QUESTION: Is AgeRating appropriate for the ratings field?
 - TS QUESTION: Is first air appropriate for releaseDate and dateAdded?
 - TS QUESTION: Are season and ep numbers populated in TS?
-- AWS: Use gitlab / serverless framework to manage code
-- AWS: Upload series image files and update thumb urls in code
-- AWS: Will we handle BC creds in yml file? These should not be committed to git.
-- AWS: Implement CRON (trigger each feed seperately, can we provide BC account id?)
+- OPTIONAL FOR POST LAUNCH: retry s3 write (i think it's built in), do not write feed smaller than 200 vids
+- OPTIONAL FOR POST LAUNCH: Finalize all console.log + console.error messages
+- OPTIONAL FOR POST LAUNCH: Search by state=ACTIVE
+- Confirm validityPeriodStart + End are correct format - COMPLETE
 - AWS: Manually trigger script on demand - COMPLETE
-- AWS: Pull error logs
+- AWS: Pull error logs = COMPLETE
+- Add lastUpdated to root of feed - COMPLETE
+- Search by ott_flag=true - COMPLETE
+- Error handling on write to S3 bucket - COMPLETE
 - Create log file should be changed to console.log() - COMPLETE
 - Organize folder/files - COMPLETE
 - Handle multiple bc accounts - COMPLETE
