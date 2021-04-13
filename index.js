@@ -16,10 +16,9 @@ exports.handler = async (event) => {
   let rokuFeed = createRokuFeed(bcSourcedVideos);
 
   //Write roku feed to file
-  await writeRokuFeed(rokuFeed.feed, account);
+  let feedUpdateStatus = await writeRokuFeed(rokuFeed.feed, account);
 
   //Log results
-  let timestamp = new Date().toLocaleString();
-  console.log(`account: ${account} found: ${bcVideos.length} added: ${rokuFeed.count}`);
+  console.log(`account: ${account} - find: ${bcVideos.length} - add: ${rokuFeed.count} - write: ${feedUpdateStatus}`);
   
 }

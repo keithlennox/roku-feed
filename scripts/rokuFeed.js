@@ -7,7 +7,8 @@ const s3 = new AWS.S3(); //Access S3 object of AWS-SDK
 
 //Create Roku feed
 exports.createRokuFeed = (bcObject) => {
-    let rokuFeed = {"providerName": "TVO", "language": "en-US"};
+    let now = new Date().toISOString();
+    let rokuFeed = {"providerName": "TVO", "language": "en-US", "lastUpdated": now};
     let counter = 0;
     bcObject.forEach((bcItem) => { //For each video...
   
@@ -88,9 +89,11 @@ exports.createRokuFeed = (bcObject) => {
     }
     const params = { Bucket: "ott-feeds", Key: `roku/${folder}/feed.json`, Body: `${JSON.stringify(rokuFeed)}` };
     try {
-      const putResult = await s3.putObject(params).promise();
-      console.log(putResult);
+      const putResponse = await s3.putObject(params).promise();
+      console.log("Write to feed response: " + JSON.stringify(putResponse));
+      return true;
     }catch(error) {
       console.error(error);
     }
+    return false;
   }

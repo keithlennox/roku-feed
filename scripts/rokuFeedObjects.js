@@ -38,7 +38,7 @@ exports.createRokuVideo = (bcItem) => {
   videoObject.id = bcItem.reference_id;
   videoObject.title = bcItem.name;
   videoObject.content = {};
-  if(bcItem.custom_fields.ott_release_date) {videoObject.content.dateAdded = `${bcItem.custom_fields.ott_release_date}T08:00:00+04:00`;}else {throw new ReferenceError("ott_release_date missing for video" + bcItem.id);} //YYYY-MM-DDTHH:MM:SS+HH:MM. Used to generate the “Recently Added” category. Everything is relased 8 or 9 AM Toronto time.
+  if(bcItem.custom_fields.ott_release_date) {videoObject.content.dateAdded = `${bcItem.custom_fields.ott_release_date}T08:00:00+04:00`;}else {throw new ReferenceError("ott_release_date missing for video " + bcItem.id);} //YYYY-MM-DDTHH:MM:SS+HH:MM. Used to generate the “Recently Added” category. Everything is relased 8 or 9 AM Toronto time.
   videoObject.content.duration = Math.round(bcItem.duration / 1000); //Brightcove returns miliseconds. Roku requires seconds and must be an integer.
   videoObject.content.language = "en-us";
   videoObject.content.validityPeriodStart = bcItem.schedule.starts_at; //Must confirm format is OK for Roku
