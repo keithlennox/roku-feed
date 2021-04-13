@@ -16,7 +16,7 @@ exports.handler = async (event) => {
   let rokuFeed = createRokuFeed(bcSourcedVideos);
 
   //Write roku feed to file
-  writeRokuFeed(rokuFeed.feed, account);
+  await writeRokuFeed(rokuFeed.feed, account);
 
   //Log results
   let timestamp = new Date().toLocaleString();
