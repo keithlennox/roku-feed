@@ -1,5 +1,7 @@
 /*Functions used to create various Roku rss feed components*/
 
+const date = require('date-and-time');
+
 //Create Roku caption url
 //Accepts a single Brightcove video object
 //Returns the appropriate caption URL for that video
@@ -38,7 +40,11 @@ exports.createRokuVideo = (bcItem) => {
   videoObject.id = bcItem.reference_id;
   videoObject.title = bcItem.name;
   videoObject.content = {};
-  if(bcItem.custom_fields.ott_release_date) {videoObject.content.dateAdded = `${bcItem.custom_fields.ott_release_date}T08:00:00+04:00`;}else {throw new ReferenceError("ott_release_date missing for video " + bcItem.id);} //YYYY-MM-DDTHH:MM:SS+HH:MM. Used to generate the “Recently Added” category. Everything is relased 8 or 9 AM Toronto time.
+  if(bcItem.custom_fields.ott_release_date && date.isValid(bcItem.custom_fields.ott_release_date, 'YYYY-MM-DD')) { //YYYY-MM-DDTHH:MM:SS+HH:MM. Used to generate the “Recently Added” category.
+    date.transform(bcItem.custom_fields.ott_release_date, 'YYYY-MM-DD', 'YYYY-MM-DDT08:mm:ssZ'); //All videos are relased 8 AM Toronto time.
+  }else {
+    throw new ReferenceError("ott_release_date missing or malformed for video " + bcItem.id);
+  }
   videoObject.content.duration = Math.round(bcItem.duration / 1000); //Brightcove returns miliseconds. Roku requires seconds and must be an integer.
   videoObject.content.language = "en-us";
   videoObject.content.validityPeriodStart = bcItem.schedule.starts_at; //Must confirm format is OK for Roku
@@ -56,7 +62,7 @@ exports.createRokuVideo = (bcItem) => {
     if(bcItem.custom_fields.ott_tags){videoObject.tags = bcItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(",");}else {throw new ReferenceError("ott_tags missing for video " + bcItem.id);}//Trim whitespace and convert string to array
   }
   videoObject.thumbnail = getBrightcoveThumb(bcItem);
-  videoObject.releaseDate = bcItem.ott_release_date; //YYYY-MM-DD. Used to sort programs chronologically and group related content in Roku Search.
+  videoObject.releaseDate = bcItem.custom_fields.ott_release_date; //YYYY-MM-DD. Used to sort programs chronologically and group related content in Roku Search.
   if(bcItem.custom_fields.ott_type === "series with seasons" || bcItem.custom_fields.ott_type === "series without seasons") {
     if(bcItem.custom_fields.ott_episode_number && bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) { //Must be a 1 or 2 digit positive integer that does not lead with zero
       videoObject.episodeNumber = bcItem.custom_fields.ott_episode_number;

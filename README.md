@@ -91,8 +91,6 @@ To run code locally, see instructions at bottom of this readme.
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 
 ### TO DO
-- Add validation to videoObject dates (releaseDate YYYY-MM-DD)
-- Add validation to seriesObject dates (releaseDate,dateAdded YYYY-MM-DD)
 - Change stills URL code
 - Publish feed to Roku and make sure it Validates
 - BC CMS API creds should be re-done and made read only
@@ -107,6 +105,7 @@ To run code locally, see instructions at bottom of this readme.
 - OPTIONAL FOR POST LAUNCH: retry s3 write (i think it's built in), do not write feed smaller than 200 vids
 - OPTIONAL FOR POST LAUNCH: Finalize all console.log + console.error messages
 - OPTIONAL FOR POST LAUNCH: Search by state=ACTIVE
+- Add validation to videoObject date (releaseDate YYYY-MM-DD) - COMPLETE
 - Confirm validityPeriodStart + End are correct format - COMPLETE
 - AWS: Manually trigger script on demand - COMPLETE
 - AWS: Pull error logs = COMPLETE
