@@ -100,7 +100,6 @@ exports.createRokuSeries = (bcObject, bcItem) => {
   })
   if(bcSeriesItem === undefined) {throw new ReferenceError(`First episode for series "${bcItem.custom_fields.ott_series_name}" not found for video ${bcItem.id}`);}
   let seriesObject = {};
-  seriesObject.thumbnail = bcSeriesItem.images.thumbnail.src; //REPLACE THIS WITH REAL SERIES THUMB!!
   seriesObject.title = bcSeriesItem.custom_fields.ott_series_name;
   if(bcSeriesItem.custom_fields.ott_series_name) {seriesObject.title = bcSeriesItem.custom_fields.ott_series_name;}else {throw new ReferenceError("ott_series_name missing for video "  + bcItem.id);}
   if(bcSeriesItem.custom_fields.ott_series_number) {seriesObject.id = bcSeriesItem.custom_fields.ott_series_number;} else {throw new ReferenceError("ott_series_number missing for video "  + bcItem.id);}
@@ -108,5 +107,8 @@ exports.createRokuSeries = (bcObject, bcItem) => {
   if(bcSeriesItem.custom_fields.ott_series_description) {seriesObject.shortDescription = bcSeriesItem.custom_fields.ott_series_description;} else {throw new ReferenceError("ott_series_description missing for video "  + bcItem.id);}
   if(bcSeriesItem.custom_fields.ott_tags) {seriesObject.tags = bcSeriesItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(",");} else {throw new ReferenceError("ott_tags missing for video "  + bcItem.id);} //Trim whitespace and convert string to array
   if(bcSeriesItem.custom_fields.ott_genres) {seriesObject.genres = bcSeriesItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(",");} else {throw new ReferenceError("ott_genres missing for video "  + bcItem.id);} //Trim whitespace and convert string to array
+  let folder;
+  if(bcItem.account_id === "18140038001") {folder = "tvo";}else if(bcItem.account_id === "15364602001") {folder = "tvokids";}
+  seriesObject.thumbnail = `https://ott-feeds.s3.ca-central-1.amazonaws.com/roku/images/series/${folder}/${bcItem.custom_fields.ott_series_number}.jpg`
   return seriesObject;
 }
