@@ -13,6 +13,9 @@ exports.createRokuFeed = (bcObject) => {
     bcObject.forEach((bcItem) => { //For each video...
   
       try{
+
+        //Throw error if ott_type is missing
+        if(!bcItem.custom_fields.ott_type) {throw new ReferenceError("ott_type missing for video " + bcItem.id);}
   
         //Series with seasosns
         if(bcItem.custom_fields.ott_type === "series with seasons") {

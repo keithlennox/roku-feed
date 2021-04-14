@@ -91,6 +91,7 @@ To run code locally, see instructions at bottom of this readme.
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 
 ### TO DO
+- Throw error if series image missing
 - Publish feed to Roku and make sure it Validates
 - BC CMS API creds should be re-done and made read only
 - AWS: Upload series image files
