@@ -97,6 +97,7 @@ To run code locally, see instructions at bottom of this readme.
 - AWS: Use gitlab / serverless framework to manage code
 - AWS: Handle BC creds in yml file. These should not be committed to git.
 - AWS: Implement CRON (trigger each feed seperately, can we provide BC account id?)
+- AWS: email notifications
 - TS QUESTION: What is the hard coded value for rating type?
 - TS QUESTION: Is AgeRating appropriate for the ratings field?
 - TS QUESTION: Is first air appropriate for releaseDate and dateAdded?
