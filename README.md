@@ -93,6 +93,7 @@ To run code locally, see instructions at bottom of this readme.
 ### TO DO
 - Throw error if series image missing
 - Publish feed to Roku and make sure it Validates
+- There are some uncaaught errors happening
 - BC CMS API creds should be re-done and made read only
 - AWS: Upload series image files
 - AWS: Use gitlab / serverless framework to manage code
@@ -103,6 +104,7 @@ To run code locally, see instructions at bottom of this readme.
 - TS QUESTION: Is AgeRating appropriate for the ratings field?
 - TS QUESTION: Is first air appropriate for releaseDate and dateAdded?
 - TS QUESTION: Are season and ep numbers populated in TS?
+- OPTIONAL FOR POST LAUNCH: more complex error handling such as no duplicate ep numbers allowed
 - OPTIONAL FOR POST LAUNCH: retry s3 write (i think it's built in), do not write feed smaller than 200 vids
 - OPTIONAL FOR POST LAUNCH: Finalize all console.log + console.error messages
 - OPTIONAL FOR POST LAUNCH: Search by state=ACTIVE
