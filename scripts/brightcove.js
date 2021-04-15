@@ -47,15 +47,13 @@ exports.getBrightcoveVideos = async (account) => {
   let bcVideos = []; //Create empty videos array
   const search = "ott_flag:true";
   //const search = "ott_flag:false";
+  console.log(`Offset: ${counter} - Array length: ${bcVideos.length}`)
   while(counter === bcVideos.length) { //Get next 100 videos until no more are returned
     for (let i = 1; i <=3; i++) { //Retry on error
       try{
-        console.log(counter);
-        console.log(bcVideos.length);
         let options = await getToken();
         let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?query=" + search + "&limit=100&offset=" + counter, options);
         bcVideos.push(...response.data);
-        console.log("Get next 100 videos")
         break; //No need to retry
       }catch(error){
         console.error(error);
@@ -64,7 +62,9 @@ exports.getBrightcoveVideos = async (account) => {
     }//End retry loop
     await sleep(111); //Brightcove rate limiting = less than 10 requests per second (111 ms = 9 requests per second)
     counter = counter + 100; //Increment counter
+    console.log(`Offset: ${counter} - Array length: ${bcVideos.length}`)
   }
+  console.log("Video retrieval complete");
   return bcVideos;//This may be an empty array if all API calls fail
 }
   

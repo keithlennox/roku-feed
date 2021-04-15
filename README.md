@@ -91,11 +91,13 @@ To run code locally, see instructions at bottom of this readme.
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 
 ### TO DO
-- Throw error if series image missing
-- Publish feed to Roku and make sure it Validates
-- There are some uncaaught errors happening
-- BC CMS API creds should be re-done and made read only
-- AWS: Upload series image files
+- Decide where to store images (Brightcove and/or S3)
+- Upload series image files thru AWS S3 console and/or Brightcove cloud
+- Check if series image is missing
+- Publish feed to Roku and make sure it validates
+- Finalize all console.log + console.error messages
+- Investigate uncaught errors
+- BC CMS API creds should be replaced and made read only
 - AWS: Use gitlab / serverless framework to manage code
 - AWS: Handle BC creds in yml file. These should not be committed to git.
 - AWS: Implement CRON (trigger each feed seperately, can we provide BC account id?)
@@ -106,8 +108,7 @@ To run code locally, see instructions at bottom of this readme.
 - TS QUESTION: Are season and ep numbers populated in TS?
 - OPTIONAL FOR POST LAUNCH: more complex error handling such as no duplicate ep numbers allowed
 - OPTIONAL FOR POST LAUNCH: retry s3 write (i think it's built in), do not write feed smaller than 200 vids
-- OPTIONAL FOR POST LAUNCH: Finalize all console.log + console.error messages
-- OPTIONAL FOR POST LAUNCH: Search by state=ACTIVE
+- OPTIONAL FOR POST LAUNCH: search by state=ACTIVE
 - Change stills URL code - COMPLETE
 - Add validation to videoObject date (releaseDate YYYY-MM-DD) - COMPLETE
 - Confirm validityPeriodStart + End are correct format - COMPLETE
