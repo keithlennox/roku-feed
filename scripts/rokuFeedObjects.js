@@ -3,8 +3,7 @@
 const date = require('date-and-time');
 
 //Create Roku caption url
-//Accepts a single Brightcove video object
-//Returns the appropriate caption URL for that video
+//Accepts a single Brightcove video object. Returns the appropriate caption URL for that video.
 const getBrightcoveCaptions = (bcItem) => {
   if(bcItem.text_tracks.length != 0) {
     let text_track = bcItem.text_tracks.find((item)=> item.kind === "captions");
@@ -19,8 +18,7 @@ const getBrightcoveCaptions = (bcItem) => {
 }
 
 //Get Brightcove thumbnail
-//Accepts a Brightcove video object
-//Returns the thumbnail url
+//Accepts a Brightcove video object. Returns the thumbnail url.
 const getBrightcoveThumb = (bcItem) => {
   if(bcItem.images.thumbnail.sources.length != 0) {
     let url = bcItem.images.thumbnail.sources.find((source) => source.src.startsWith("https://"))
@@ -32,9 +30,8 @@ const getBrightcoveThumb = (bcItem) => {
 }
 
 //Create Roku video object
-//Accepts a Brightcove video object
-//Retruns a Roku video object
-//Note: Generes used for movies and tv shows only. Tags used for movies and tv shows only. EpisodeNumber used for series only.
+//Accepts a Brightcove video object. Retruns a Roku video object.
+//Note: Generes/tags used for movies and tv specials only. EpisodeNumber used for series only.
 exports.createRokuVideo = (bcItem) => {
 
   //Validate video fields
@@ -45,7 +42,7 @@ exports.createRokuVideo = (bcItem) => {
     if(!bcItem.custom_fields.ott_tags) {throw new ReferenceError("ott_tags missing for video " + bcItem.id);}
   }
   if(bcItem.custom_fields.ott_type === "series with seasons" || bcItem.custom_fields.ott_type === "series without seasons") {
-    if(!bcItem.custom_fields.ott_episode_number || !bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("Episode number is not formatted correctly for video " + bcItem.id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
+    if(!bcItem.custom_fields.ott_episode_number || !bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_episode_number is missing or malformed for video " + bcItem.id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
   }
   if(!bcItem.custom_fields.ott_rating) {throw new ReferenceError("ott_rating missing for video " + bcItem.id);}
   
@@ -86,7 +83,7 @@ exports.createRokuVideo = (bcItem) => {
 exports.createRokuSeason = (bcItem) => {
 
   //Validate season fields
-  if(!bcItem.custom_fields.ott_season_number || !bcItem.custom_fields.ott_season_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("Season number is not formatted correctly for video " + bcItem.id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
+  if(!bcItem.custom_fields.ott_season_number || !bcItem.custom_fields.ott_season_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_season_number is missing or malformed for video " + bcItem.id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
 
   //Populate season object
   let seasonObject = {};
@@ -96,15 +93,14 @@ exports.createRokuSeason = (bcItem) => {
 }
 
 //Create Roku series object
-//Accepts a Brightcove video object and an array containing all Brightcove video objects
-//Retruns the Roku series object
+//Accepts a Brightcove video object and an array containing all Brightcove video objects. Retruns the Roku series object.
 exports.createRokuSeries = (bcObject, bcItem) => {
 
   //Validate fields for the current video
   if(!bcItem.custom_fields.ott_series_name) {throw new ReferenceError("ott_series_name missing for video " + bcItem.id);}
-  if(!bcItem.custom_fields.ott_season_number) {throw new ReferenceError("ott_season_number missing for video " + bcItem.id);}
-  if(!bcItem.custom_fields.ott_episode_number) {throw new ReferenceError("ott_episode_number missing for video " + bcItem.id);}
-
+  if(!bcItem.custom_fields.ott_season_number || !bcItem.custom_fields.ott_season_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_season_number is missing or malformed for video " + bcItem.id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
+  if(!bcItem.custom_fields.ott_episode_number || !bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_episode_number is missing or malformed for video " + bcItem.id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
+  
   //Find the first episode of the series
   let bcSeriesItem = bcObject.find((item) => {
     if(bcItem.custom_fields.ott_type === "series with seasons") {
@@ -116,7 +112,6 @@ exports.createRokuSeries = (bcObject, bcItem) => {
   if(bcSeriesItem === undefined) {throw new ReferenceError(`First episode for series "${bcItem.custom_fields.ott_series_name}" not found for video ${bcItem.id}`);}
 
   //Validate fields for the first episode for the series
-  if(!bcSeriesItem.custom_fields.ott_series_name) {throw new ReferenceError("ott_series_name missing for video " + bcSeriesItem.id);}
   if(!bcSeriesItem.custom_fields.ott_series_number) {throw new ReferenceError("ott_series_number missing for video " + bcSeriesItem.id);}
   if(!bcSeriesItem.custom_fields.ott_release_date || !date.isValid(bcSeriesItem.custom_fields.ott_release_date, 'YYYY-MM-DD')) {throw new ReferenceError("ott_release_date missing or malformed for video " + bcSeriesItem.id);}
   if(!bcSeriesItem.custom_fields.ott_series_description) {throw new ReferenceError("ott_series_description missing for video " + bcSeriesItem.id);}
@@ -133,7 +128,8 @@ exports.createRokuSeries = (bcObject, bcItem) => {
   seriesObject.genres = bcSeriesItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(","); //Trim whitespace and convert string to array
   let folder;
   if(bcItem.account_id === "18140038001") {folder = "tvo";}else if(bcItem.account_id === "15364602001") {folder = "tvokids";}
-  seriesObject.thumbnail = `https://ott-feeds.s3.ca-central-1.amazonaws.com/roku/images/series/${folder}/${bcItem.custom_fields.ott_series_number}.jpg`
+  seriesObject.thumbnail = `https://d81ef65ednp0p.cloudfront.net/images/series/tvo/3878.jpg`
+  seriesObject.thumbnail = `https://d81ef65ednp0p.cloudfront.net/images/series/${folder}/${bcSeriesItem.custom_fields.ott_series_number}.jpg`
   return seriesObject;
 
 }
