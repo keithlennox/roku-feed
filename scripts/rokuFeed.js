@@ -6,11 +6,13 @@ const { createRokuSeries, createRokuSeason, createRokuVideo } = require('./rokuF
 const s3 = new AWS.S3(); //Access S3 object of AWS-SDK
 
 //Create Roku feed
-exports.createRokuFeed = (bcObject) => {
+exports.createRokuFeed = async (bcObject) => {
     let now = new Date().toISOString();
-    let rokuFeed = {"providerName": "TVO", "language": "en-US", "lastUpdated": now};
+    let rokuFeed = {"providerName": "TVO", "language": "en", "lastUpdated": now};
     let counter = 0;
-    bcObject.forEach((bcItem) => { //For each video...
+
+    //Loop thru all Brightcove videos
+    for(let bcItem of bcObject) {
   
       try{
 
@@ -21,13 +23,13 @@ exports.createRokuFeed = (bcObject) => {
         if(bcItem.custom_fields.ott_type === "series with seasons") {
           let videoObject = createRokuVideo(bcItem);
           if(!rokuFeed.hasOwnProperty("series")) {
-            let seriesObject = createRokuSeries(bcObject, bcItem);
+            let seriesObject = await createRokuSeries(bcObject, bcItem);
             let seasonObject = createRokuSeason(bcItem);
             rokuFeed.series = [{...seriesObject, "seasons":[{...seasonObject, "episodes": [{...videoObject}]}]}];
           }else{
             let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.ott_series_name) //Check if series INDEX exists
             if(rokuSeriesIndex === -1) { //If series does not exist...
-              let seriesObject = createRokuSeries(bcObject, bcItem);
+              let seriesObject = await createRokuSeries(bcObject, bcItem);
               let seasonObject = createRokuSeason(bcItem);
               rokuFeed.series.push({...seriesObject, "seasons":[{...seasonObject, "episodes": [{...videoObject}]}]}); //PUSH series/season/episode
             }else{ //If the series exists...
@@ -45,12 +47,12 @@ exports.createRokuFeed = (bcObject) => {
         }else if(bcItem.custom_fields.ott_type === "series without seasons") {
           let videoObject = createRokuVideo(bcItem);
           if(!rokuFeed.hasOwnProperty("series")) {
-            let seriesObject = createRokuSeries(bcObject, bcItem);
+            let seriesObject = await createRokuSeries(bcObject, bcItem);
             rokuFeed.series = [{...seriesObject, "episodes": [{...videoObject}]}];
           }else{
             let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.ott_series_name) //Check if series INDEX exists
             if(rokuSeriesIndex === -1) { //If series does not exist...
-              let seriesObject = createRokuSeries(bcObject, bcItem);
+              let seriesObject = await createRokuSeries(bcObject, bcItem);
               rokuFeed.series.push({...seriesObject, "episodes": [{...videoObject}]}); //PUSH series/season/episode
             }else{ //If the series exists...
               rokuFeed.series[rokuSeriesIndex].episodes.push({...videoObject}); //PUSH episode
@@ -76,7 +78,8 @@ exports.createRokuFeed = (bcObject) => {
         console.error(error);
       }
   
-    }) //End looping thru Brightcove videos
+    }//End looping thru Brightcove videos
+  
     return {"feed": rokuFeed, "count": counter};
   
   }

@@ -1,11 +1,14 @@
 # Roku Direct Publisher feed generator
 
-Creates Direct Publisher json feed for Roku
+Creates Direct Publisher json feed for Roku TVO and TVOKIDS channels
 
 ## Details
 
-Videos are hosted on Brightcove. Code is hosted on AWS Lambda.
-To run code locally, see instructions at bottom of this readme.
+Videos are hosted on Brightcove. Code is hosted on AWS Lambda.  
+To run code locally, see instructions at bottom of this readme.  
+Feeds are available here:  
+https://d81ef65ednp0p.cloudfront.net/tvo/feed.json   
+https://d81ef65ednp0p.cloudfront.net/tvokids/feed.json   
 
 ### PROJECT CONSTRAINTS
 

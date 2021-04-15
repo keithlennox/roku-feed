@@ -13,7 +13,7 @@ exports.handler = async (event) => {
   let bcSourcedVideos = await getBrightcoveSource(bcVideos);
 
   //Create roku feed
-  let rokuFeed = createRokuFeed(bcSourcedVideos);
+  let rokuFeed = await createRokuFeed(bcSourcedVideos);
 
   //Write roku feed to file
   let feedUpdateStatus = await writeRokuFeed(rokuFeed.feed, account);
