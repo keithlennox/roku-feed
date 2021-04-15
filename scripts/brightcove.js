@@ -92,5 +92,6 @@ exports.getBrightcoveSource = async (bcVideos) => {
     }//End retry loop
     await sleep(111); //Brightcove rate limiting = less than 10 requests per second (111 ms = 9 requests per second)
   }
+  console.log("Source retieval complete");
   return bcVideos;
 } //End function
