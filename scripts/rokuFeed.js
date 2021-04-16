@@ -27,13 +27,13 @@ exports.createRokuFeed = async (bcObject) => {
             let seasonObject = createRokuSeason(bcItem);
             rokuFeed.series = [{...seriesObject, "seasons":[{...seasonObject, "episodes": [{...videoObject}]}]}];
           }else{
-            let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.ott_series_name) //Check if series INDEX exists
+            let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title == bcItem.custom_fields.ott_series_name) //Check if series INDEX exists
             if(rokuSeriesIndex === -1) { //If series does not exist...
               let seriesObject = await createRokuSeries(bcObject, bcItem);
               let seasonObject = createRokuSeason(bcItem);
               rokuFeed.series.push({...seriesObject, "seasons":[{...seasonObject, "episodes": [{...videoObject}]}]}); //PUSH series/season/episode
             }else{ //If the series exists...
-              let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber === bcItem.custom_fields.ott_season_number) //Check if season INDEX exists
+              let rokuSeasonIndex = rokuFeed.series[rokuSeriesIndex].seasons.findIndex((seasonsItem) => seasonsItem.seasonNumber == bcItem.custom_fields.ott_season_number) //Check if season INDEX exists
               if(rokuSeasonIndex === -1) { //If the season does not exist...
                 let seasonObject = createRokuSeason(bcItem);
                 rokuFeed.series[rokuSeriesIndex].seasons.push({...seasonObject, "episodes": [{...videoObject}]});//PUSH season/episode
@@ -50,7 +50,7 @@ exports.createRokuFeed = async (bcObject) => {
             let seriesObject = await createRokuSeries(bcObject, bcItem);
             rokuFeed.series = [{...seriesObject, "episodes": [{...videoObject}]}];
           }else{
-            let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title === bcItem.custom_fields.ott_series_name) //Check if series INDEX exists
+            let rokuSeriesIndex = rokuFeed.series.findIndex((item) => item.title == bcItem.custom_fields.ott_series_name) //Check if series INDEX exists
             if(rokuSeriesIndex === -1) { //If series does not exist...
               let seriesObject = await createRokuSeries(bcObject, bcItem);
               rokuFeed.series.push({...seriesObject, "episodes": [{...videoObject}]}); //PUSH series/season/episode
