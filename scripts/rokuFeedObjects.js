@@ -6,21 +6,16 @@ const axios = require('axios');
 //Create Roku caption url
 //Accepts a single Brightcove video object. Returns the appropriate caption URL for that video.
 const getBrightcoveCaptions = (bcItem) => {
-  try{
-    if(bcItem.text_tracks.length != 0) {
-      let text_track = bcItem.text_tracks.find((item)=> item.kind === "captions");
-      if(text_track) {
-        let url = text_track.sources.find((item2) => item2.src.startsWith("https://"))
-        if(url) {
-          return url.src;
-        }
+  if(bcItem.text_tracks.length != 0) {
+    let text_track = bcItem.text_tracks.find((item)=> item.kind === "captions");
+    if(text_track) {
+      let url = text_track.sources.find((item2) => item2.src.startsWith("https://"))
+      if(url) {
+        return url.src;
       }
     }
-    throw new ReferenceError("Caption file not found for video " + bcItem.id);
-  }catch(error){
-    console.error(error);
   }
-  return undefined;
+  throw new ReferenceError("Caption file not found for video " + bcItem.id);
 }
 
 //Get Brightcove thumbnail
@@ -76,17 +71,17 @@ exports.createRokuVideo = (bcItem) => {
   videoObject.content.language = "en";
   videoObject.content.validityPeriodStart = bcItem.schedule.starts_at;
   videoObject.content.validityPeriodEnd = bcItem.schedule.ends_at;
-  videoObject.content.videos = {};
-  videoObject.content.videos.videoType = "HLS";
-  videoObject.content.videos.url = bcItem.video_url;
-  videoObject.content.videos.quality = "FHD";
-  let captionsUrl = getBrightcoveCaptions(bcItem);
-  if(captionsUrl){
-    videoObject.content.captions = {};
-    videoObject.content.captions.language = "en";
-    videoObject.content.captions.captionType = "CLOSED_CAPTION";
-    videoObject.content.captions.url = captionsUrl;
-  }
+  videoObject.content.videos = [{
+    "url": bcItem.video_url,
+    "quality": "FHD",
+    "videoType": "HLS"
+  }];
+  videoObject.content.captions = [{
+    "url": getBrightcoveCaptions(bcItem),
+    "language": "en",
+    "captionType": "CLOSED_CAPTION"
+    
+  }];
   if(bcItem.custom_fields.ott_type === "movies" || bcItem.custom_fields.ott_type === "tv specials") {
     videoObject.genres = bcItem.custom_fields.ott_genres.trim().replace(/ *, */g, ",").split(",");//Trim whitespace and convert string to array
     videoObject.tags = bcItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(",");//Trim whitespace and convert string to array
