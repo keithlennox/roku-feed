@@ -92,7 +92,7 @@ exports.createRokuVideo = (bcItem) => {
     videoObject.tags = bcItem.custom_fields.ott_tags.trim().replace(/ *, */g, ",").split(",");//Trim whitespace and convert string to array
   }
   if(bcItem.custom_fields.ott_type === "series with seasons" || bcItem.custom_fields.ott_type === "series without seasons") {
-    videoObject.episodeNumber = bcItem.custom_fields.ott_episode_number;
+    videoObject.episodeNumber = parseInt(bcItem.custom_fields.ott_episode_number);
   }
   videoObject.thumbnail = getBrightcoveThumb(bcItem);
   videoObject.releaseDate = bcItem.custom_fields.ott_release_date; //YYYY-MM-DD. Used to sort programs chronologically and group related content in Roku Search.
@@ -110,7 +110,7 @@ exports.createRokuSeason = (bcItem) => {
 
   //Populate season object
   let seasonObject = {};
-  seasonObject.seasonNumber = bcItem.custom_fields.ott_season_number;
+  seasonObject.seasonNumber = parseInt(bcItem.custom_fields.ott_season_number);
   return seasonObject;
   
 }
