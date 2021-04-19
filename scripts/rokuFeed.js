@@ -97,9 +97,9 @@ exports.createRokuFeed = async (bcObject) => {
         console.error(error);
       }
   
-      console.log("Push videos to Roku feed complete");
-
     }//End looping thru Brightcove videos
+
+    console.log("Push videos to Roku feed complete");
   
     return {"feed": rokuFeed, "count": counter};
   
