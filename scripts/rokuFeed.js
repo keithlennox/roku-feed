@@ -10,6 +10,7 @@ exports.createRokuFeed = async (bcObject) => {
     let now = new Date().toISOString();
     let rokuFeed = {"providerName": "TVO", "language": "en", "lastUpdated": now};
     let counter = 0;
+    console.log("Pushing videos to Roku feed");
 
     //Loop thru all Brightcove videos
     for(let bcItem of bcObject) {
@@ -96,6 +97,8 @@ exports.createRokuFeed = async (bcObject) => {
         console.error(error);
       }
   
+      console.log("Push videos to Roku feed complete");
+
     }//End looping thru Brightcove videos
   
     return {"feed": rokuFeed, "count": counter};
