@@ -1,4 +1,9 @@
-/*Functions used to call Brightcove CMS API to retrieve video metadata*/
+/*Functions used to call Brightcove CMS API to retrieve video metadata
+
+Note: Brightcove CMS API may return duplicate results unless you include a sort parameter.
+See known issues at bottom of:
+https://apis.support.brightcove.com/cms/searching/cmsplayback-api-videos-search.html
+*/
 
 const axios = require('axios');
 
@@ -27,7 +32,7 @@ const getToken = async () => {
     console.log("Returned new token");
     return getToken.options; //Return a new token
   }
-  console.log("Returned exisiting token");
+  //console.log("Returned exisiting token");
   return getToken.options; //Return the exisiting token because it has not expired yet
 }
   
@@ -52,7 +57,7 @@ exports.getBrightcoveVideos = async (account) => {
     for (let i = 1; i <=3; i++) { //Retry on error
       try{
         let options = await getToken();
-        let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?query=" + search + "&limit=100&offset=" + counter, options);
+        let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?sort=created_at&query=" + search + "&limit=100&offset=" + counter, options);
         bcVideos.push(...response.data);
         break; //No need to retry
       }catch(error){
@@ -80,7 +85,7 @@ exports.getBrightcoveSource = async (bcVideos) => {
         let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + bcVideo.account_id + "/videos/" + bcVideo.id + "/sources", options) //Get the sources array
         for(let source of response.data) { //For each sources array...
           if(source.src && source.src.startsWith("https://") && source.type === "application/x-mpegURL") { //Get the HLS source
-            console.log(source.src);
+            console.log(`${bcVideo.id} - ${bcVideo.reference_id} - ${source.src}`);
             bcVideo.video_url = source.src;
           }
         }
