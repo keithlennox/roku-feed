@@ -94,13 +94,11 @@ https://d81ef65ednp0p.cloudfront.net/tvokids/feed.json
 - Roku's sample feed does not adhere to their spec doc. Which is correct?
 
 ### TO DO
-- Decide where to store images (Brightcove and/or S3)
-- Upload series image files thru AWS S3 console and/or Brightcove cloud
-- Check if series image is missing
+
+- Replace BC CMS API creds and madke read only
 - Publish feed to Roku and make sure it validates
-- Finalize all console.log + console.error messages
+- Fix duplicate video issue
 - Investigate uncaught errors
-- BC CMS API creds should be replaced and made read only
 - AWS: Use gitlab / serverless framework to manage code
 - AWS: Handle BC creds in yml file. These should not be committed to git.
 - AWS: Implement CRON (trigger each feed seperately, can we provide BC account id?)
@@ -109,9 +107,14 @@ https://d81ef65ednp0p.cloudfront.net/tvokids/feed.json
 - TS QUESTION: Is AgeRating appropriate for the ratings field?
 - TS QUESTION: Is first air appropriate for releaseDate and dateAdded?
 - TS QUESTION: Are season and ep numbers populated in TS?
+- POST LAUNCH: Fix custom fields explanations
+- POST LAUNCH: Add note about where images are stored
+- POST LAUNCH: Finalize all console.log + console.error messages
 - OPTIONAL FOR POST LAUNCH: more complex error handling such as no duplicate ep numbers allowed
 - OPTIONAL FOR POST LAUNCH: retry s3 write (i think it's built in), do not write feed smaller than 200 vids
 - OPTIONAL FOR POST LAUNCH: search by state=ACTIVE
+- Decide where to store images (Brightcove and/or S3) - COMPLETE
+- Upload series image files thru AWS S3 console and/or Brightcove cloud - COMPLETE
 - Change stills URL code - COMPLETE
 - Add validation to videoObject date (releaseDate YYYY-MM-DD) - COMPLETE
 - Confirm validityPeriodStart + End are correct format - COMPLETE
