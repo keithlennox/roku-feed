@@ -9,8 +9,8 @@ const axios = require('axios');
 
 //Get API token (required for all Brightcove API calls)
 const getToken = async () => {
-  const client_id = "2a703469-6009-4204-bcb3-ba3cec61abf5";
-  const client_secret = "4munZY-rUvfs-SnoaMXkkywC_z9Li5fViX_GGOz2k9A-IwkOhEksFiGsdG88g_1JmuYd_60Tvk5wf48Cdvv52g";
+  const client_id = "0662e8e3-fd23-436f-a872-67bf00efbbf6";
+  const client_secret = "K_ID0Da0pSxkRty0uIL9Pqa9hevEnavqjnNtOMxJ7sUFRGvsQkXAmMFzEskhYPUJcarP12q6RG5LmCHfWHKhkw";
   var auth_string = new Buffer(client_id + ":" + client_secret).toString('base64');
   const oauth_body = "grant_type=client_credentials";
   const oauth_options = {
