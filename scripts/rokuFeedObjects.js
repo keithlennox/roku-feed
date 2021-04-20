@@ -15,7 +15,7 @@ const getBrightcoveCaptions = (bcItem) => {
       }
     }
   }
-  throw new ReferenceError("Caption file not found for video " + bcItem.id);
+  throw new ReferenceError("Caption file not found for video " + bcItem.reference_id);
 }
 
 //Get Brightcove thumbnail
@@ -27,7 +27,7 @@ const getBrightcoveThumb = (bcItem) => {
       return url.src;
     }
   }
-  throw new ReferenceError("Thumbnail file not found for video " + bcItem.id);
+  throw new ReferenceError("Thumbnail file not found for video " + bcItem.reference_id);
 }
 
 //Get Brightcove series thumbnail
@@ -50,16 +50,16 @@ const getBrightcoveSeriesThumb = async (bcSeriesItem) => {
 exports.createRokuVideo = (bcItem) => {
 
   //Validate video fields
-  if(!bcItem.custom_fields.ott_release_date || !date.isValid(bcItem.custom_fields.ott_release_date, 'YYYY-MM-DD')) {throw new ReferenceError("ott_release_date missing or malformed for video " + bcItem.id);}
-  if(!bcItem.video_url) {throw new ReferenceError("No video url found for " + bcItem.id);}
+  if(!bcItem.custom_fields.ott_release_date || !date.isValid(bcItem.custom_fields.ott_release_date, 'YYYY-MM-DD')) {throw new ReferenceError("ott_release_date missing or malformed for video " + bcItem.reference_id);}
+  if(!bcItem.video_url) {throw new ReferenceError("No video url found for " + bcItem.reference_id);}
   if(bcItem.custom_fields.ott_type === "movies" || bcItem.custom_fields.ott_type === "tv specials") {
-    if(!bcItem.custom_fields.ott_genres) {throw new ReferenceError("ott_genres missing for video " + bcItem.id);}
-    if(!bcItem.custom_fields.ott_tags) {throw new ReferenceError("ott_tags missing for video " + bcItem.id);}
+    if(!bcItem.custom_fields.ott_genres) {throw new ReferenceError("ott_genres missing for video " + bcItem.reference_id);}
+    if(!bcItem.custom_fields.ott_tags) {throw new ReferenceError("ott_tags missing for video " + bcItem.reference_id);}
   }
   if(bcItem.custom_fields.ott_type === "series with seasons" || bcItem.custom_fields.ott_type === "series without seasons") {
-    if(!bcItem.custom_fields.ott_episode_number || !bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_episode_number is missing or malformed for video " + bcItem.id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
+    if(!bcItem.custom_fields.ott_episode_number || !bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_episode_number is missing or malformed for video " + bcItem.reference_id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
   }
-  if(!bcItem.custom_fields.ott_rating) {throw new ReferenceError("ott_rating missing for video " + bcItem.id);}
+  if(!bcItem.custom_fields.ott_rating) {throw new ReferenceError("ott_rating missing for video " + bcItem.reference_id);}
   
   //Populate video object
   let videoObject = {};
@@ -101,7 +101,7 @@ exports.createRokuVideo = (bcItem) => {
 exports.createRokuSeason = (bcItem) => {
 
   //Validate season fields
-  if(!bcItem.custom_fields.ott_season_number || !bcItem.custom_fields.ott_season_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_season_number is missing or malformed for video " + bcItem.id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
+  if(!bcItem.custom_fields.ott_season_number || !bcItem.custom_fields.ott_season_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_season_number is missing or malformed for video " + bcItem.reference_id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
 
   //Populate season object
   let seasonObject = {};
@@ -115,25 +115,25 @@ exports.createRokuSeason = (bcItem) => {
 exports.createRokuSeries = async (bcObject, bcItem) => {
 
   //Find the first episode of the series or season
-  if(!bcItem.custom_fields.ott_series_name) {throw new ReferenceError("ott_series_name missing for video " + bcItem.id);}
-  if(!bcItem.custom_fields.ott_episode_number || !bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_episode_number is missing or malformed for video " + bcItem.id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
+  if(!bcItem.custom_fields.ott_series_name) {throw new ReferenceError("ott_series_name missing for video " + bcItem.reference_id);}
+  if(!bcItem.custom_fields.ott_episode_number || !bcItem.custom_fields.ott_episode_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_episode_number is missing or malformed for video " + bcItem.reference_id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
   let bcSeriesItem = bcObject.find((item) => {
     if(bcItem.custom_fields.ott_type === "series with seasons") {
-      if(!bcItem.custom_fields.ott_season_number || !bcItem.custom_fields.ott_season_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_season_number is missing or malformed for video " + bcItem.id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
+      if(!bcItem.custom_fields.ott_season_number || !bcItem.custom_fields.ott_season_number.match(/^[1-9][0-9]{0,1}$/)) {throw new ReferenceError("ott_season_number is missing or malformed for video " + bcItem.reference_id);} //Must be a 1 or 2 digit positive integer that does not lead with zero
       return item.custom_fields.ott_series_name === bcItem.custom_fields.ott_series_name && item.custom_fields.ott_season_number === bcItem.custom_fields.ott_season_number && item.custom_fields.ott_episode_number === "1";
     }else {
       return item.custom_fields.ott_series_name === bcItem.custom_fields.ott_series_name && item.custom_fields.ott_episode_number === "1";
     }
     
   })
-  if(bcSeriesItem === undefined) {throw new ReferenceError(`First episode for series "${bcItem.custom_fields.ott_series_name}" not found for video ${bcItem.id}`);}
+  if(bcSeriesItem === undefined) {throw new ReferenceError(`First episode for series "${bcItem.custom_fields.ott_series_name}" not found for video ${bcItem.reference_id}`);}
 
   //Validate fields for the video we found that is first episode for the series or season
-  if(!bcSeriesItem.custom_fields.ott_series_number) {throw new ReferenceError("ott_series_number missing for video " + bcSeriesItem.id);}
-  if(!bcSeriesItem.custom_fields.ott_release_date || !date.isValid(bcSeriesItem.custom_fields.ott_release_date, 'YYYY-MM-DD')) {throw new ReferenceError("ott_release_date missing or malformed for video " + bcSeriesItem.id);}
-  if(!bcSeriesItem.custom_fields.ott_series_description) {throw new ReferenceError("ott_series_description missing for video " + bcSeriesItem.id);}
-  if(!bcSeriesItem.custom_fields.ott_tags) {throw new ReferenceError("ott_tags missing for video " + bcSeriesItem.id);}
-  if(!bcSeriesItem.custom_fields.ott_genres) {throw new ReferenceError("ott_genres missing for video " + bcSeriesItem.id);}
+  if(!bcSeriesItem.custom_fields.ott_series_number) {throw new ReferenceError("ott_series_number missing for video " + bcSeriesItem.reference_id);}
+  if(!bcSeriesItem.custom_fields.ott_release_date || !date.isValid(bcSeriesItem.custom_fields.ott_release_date, 'YYYY-MM-DD')) {throw new ReferenceError("ott_release_date missing or malformed for video " + bcSeriesItem.reference_id);}
+  if(!bcSeriesItem.custom_fields.ott_series_description) {throw new ReferenceError("ott_series_description missing for video " + bcSeriesItem.reference_id);}
+  if(!bcSeriesItem.custom_fields.ott_tags) {throw new ReferenceError("ott_tags missing for video " + bcSeriesItem.reference_id);}
+  if(!bcSeriesItem.custom_fields.ott_genres) {throw new ReferenceError("ott_genres missing for video " + bcSeriesItem.reference_id);}
   
   //Populate series object
   let seriesObject = {};
