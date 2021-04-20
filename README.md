@@ -1,9 +1,6 @@
 # Roku Direct Publisher feed generator
 
-Creates Direct Publisher json feed for Roku TVO and TVOKIDS channels
-
-## Details
-
+Creates Direct Publisher json feed for Roku TVO and TVOKIDS channels  
 Videos are hosted on Brightcove. Code is hosted on AWS Lambda.  
 To run code locally, see instructions at bottom of this readme.  
 Feeds are available here:  
@@ -89,16 +86,15 @@ https://d81ef65ednp0p.cloudfront.net/tvokids/feed.json
 - video      { url, quality, videoType }
 - captions   {url, language, captionType}
 
-### QUESTIONS
-
-- Roku's sample feed does not adhere to their spec doc. Which is correct?
-
 ### TO DO
 
 - Replace BC CMS API creds and madke read only
 - Publish feed to Roku and make sure it validates
-- Fix duplicate video issue
-- Investigate uncaught errors
+- Investigate uncaught errors - IN PROGRESS
+- Improve logging
+- Fix custom fields explanations (on Brightcove and this readme)
+- Add to readme: error handling checks individual fields. Does not check interactions between fields. Provide examples: duplicate ep nums, sws and swos within same series. Can cause unexpected errors. 
+- Add to readme: where images are stored
 - AWS: Use gitlab / serverless framework to manage code
 - AWS: Handle BC creds in yml file. These should not be committed to git.
 - AWS: Implement CRON (trigger each feed seperately, can we provide BC account id?)
@@ -106,13 +102,7 @@ https://d81ef65ednp0p.cloudfront.net/tvokids/feed.json
 - TS QUESTION: What is the hard coded value for rating type?
 - TS QUESTION: Is AgeRating appropriate for the ratings field?
 - TS QUESTION: Is first air appropriate for releaseDate and dateAdded?
-- TS QUESTION: Are season and ep numbers populated in TS?
-- POST LAUNCH: Fix custom fields explanations
-- POST LAUNCH: Add note about where images are stored
-- POST LAUNCH: Finalize all console.log + console.error messages
-- OPTIONAL FOR POST LAUNCH: more complex error handling such as no duplicate ep numbers allowed
-- OPTIONAL FOR POST LAUNCH: retry s3 write (i think it's built in), do not write feed smaller than 200 vids
-- OPTIONAL FOR POST LAUNCH: search by state=ACTIVE
+- Fix duplicate video issue - COMPLETE
 - Decide where to store images (Brightcove and/or S3) - COMPLETE
 - Upload series image files thru AWS S3 console and/or Brightcove cloud - COMPLETE
 - Change stills URL code - COMPLETE
@@ -141,6 +131,7 @@ https://d81ef65ednp0p.cloudfront.net/tvokids/feed.json
 *Brightcove video custom fields, 1st ep only: some manual effort by MSOs  
 Brightcove playlists: more manual effort by MSOs, max 100 videos so need playlist for every season, cannot search videos by playable  
 Brightcove folders: name field only  
+Brightcove dummy CMS records  
 CPAD programs: requires more complexity, would still need to call BC for URL and strand  
 
 ### ERROR HANDLING (retry, log, notify)
@@ -172,34 +163,6 @@ Script try/catches any error, script skips only video that has error.
 - Get videos: includes sources
 - Get playlist by id
 - Static URLs
-
-### RESOURCES
-
-https://www.robinwieruch.de/javascript-map-array  
-https://codepunk.io/xml-vs-json-why-json-sucks/  
-https://developer.mozilla.org/en-US/docs/Web/XSLT/XSLT_JS_interface_in_Gecko/JavaScript_XSLT_Bindings  
-https://www.npmjs.com/package/saxon-js  
-https://www.npmjs.com/package/object-mapper  
-https://www.npmjs.com/package/node-json-transform  
-https://www.npmjs.com/package/object-mapper  
-https://www.npmjs.com/package/dot-object  
-https://www.npmjs.com/package/handlebars  
-https://javascript.info/json  
-https://www.freecodecamp.org/news/javascript-array-of-objects-tutorial-how-to-create-update-and-loop-through-objects-using-js-array-methods/  
-https://dev.to/lokinder1/cheatsheet-of-most-useful-javascript-array-functions-48j1  
-https://javascript.info/array-methods  
-https://www.linkedin.com/pulse/javascript-find-object-array-based-objects-property-rafael/  
-https://usefulangle.com/post/3/javascript-search-array-of-objects  
-https://www.javascripttutorial.net/es6/javascript-array-findindex/  
-https://apis.support.brightcove.com/cms/code-samples/cms-api-sample-mrss-generator.html  
-https://apis.support.brightcove.com/playback/code-samples/playback-api-sample-mrss-generator.html  
-https://apis.support.brightcove.com/cms/code-samples/cms-api-sample-mrss-feed-playlist.html  
-https://apis.support.brightcove.com/playback/code-samples/playback-api-sample-jsonmrss-feed-playlist.html  
-https://github.com/registerguard/brightcove-cms-api-php-rss  
-https://www.toptal.com/nodejs/node-js-error-handling  
-https://gomakethings.com/sorting-an-array-by-multiple-criteria-with-vanilla-javascript  
-https://stackoverflow.com/questions/10834796/validate-that-a-string-is-a-positive-integer  
-
 
 ### RUN CODE LOCALLY
 
