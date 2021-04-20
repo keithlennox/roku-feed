@@ -88,13 +88,14 @@ https://d81ef65ednp0p.cloudfront.net/tvokids/feed.json
 
 ### TO DO
 
-- Replace BC CMS API creds and madke read only
+- Improve logging - IN PROGRESS
 - Publish feed to Roku and make sure it validates
-- Investigate uncaught errors - IN PROGRESS
-- Improve logging
 - Fix custom fields explanations (on Brightcove and this readme)
 - Add to readme: error handling checks individual fields. Does not check interactions between fields. Provide examples: duplicate ep nums, sws and swos within same series. Can cause unexpected errors. 
 - Add to readme: where images are stored
+- Replace BC CMS API creds and make read only
+- Commit PHP reports script to repo
+- AWS: Fix content type on write feed to s3
 - AWS: Use gitlab / serverless framework to manage code
 - AWS: Handle BC creds in yml file. These should not be committed to git.
 - AWS: Implement CRON (trigger each feed seperately, can we provide BC account id?)
@@ -102,6 +103,7 @@ https://d81ef65ednp0p.cloudfront.net/tvokids/feed.json
 - TS QUESTION: What is the hard coded value for rating type?
 - TS QUESTION: Is AgeRating appropriate for the ratings field?
 - TS QUESTION: Is first air appropriate for releaseDate and dateAdded?
+- Investigate uncaught errors - COMPLETE
 - Fix duplicate video issue - COMPLETE
 - Decide where to store images (Brightcove and/or S3) - COMPLETE
 - Upload series image files thru AWS S3 console and/or Brightcove cloud - COMPLETE
