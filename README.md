@@ -67,13 +67,15 @@ OTT Type / ott_type / restricted list / NA
 - This script does some minimal validation of the OTT custom fields.
 - Validation does not compare fields. For example, we check that episode# is an integer, but we don't check if ep 2 has been used more than once within a series/season.
 
-### ROADMAP - IMPROVE ERROR HANDLING
+## ROADMAP
+
+#### IMPROVE ERROR HANDLING
 
 - OTT Type: cannot be different within the same series.
 - OTT Season Number: cannot be duplicated within the same series.
 - OTT Episode Number: cannot be duplicated within the same season or the same series.
 
-### ROADMAP - FIND BETTER PLACE FOR SERIES INFO
+#### FIND BETTER PLACE FOR SERIES INFO
 
 Some of the available options:  
   
