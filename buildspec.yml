@@ -6,7 +6,7 @@ env:
 phases:
   install:
     runtime-versions:
-      nodejs: 14.x
+      nodejs: 14
     commands:
       - echo Entered the install phase...
       - npm install
