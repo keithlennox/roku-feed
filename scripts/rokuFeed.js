@@ -99,7 +99,7 @@ exports.writeRokuFeed = async (rokuFeed, account) => {
   {
     folder = "tvokids";
   }
-  const params = { Bucket: "ott-feeds", Key: `roku/${folder}/feed.json`, Body: `${JSON.stringify(rokuFeed)}` };
+  const params = { Bucket: "ott-feeds", Key: `roku/${folder}/feed.json`, Body: `${JSON.stringify(rokuFeed)}`, ContentType: "application/json"}; //S3 defaults to application/octet-stream if ContentType omitted
   try {
     const putResponse = await s3.putObject(params).promise();
     console.log("Write to feed response: " + JSON.stringify(putResponse));
