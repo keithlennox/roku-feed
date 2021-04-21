@@ -67,14 +67,20 @@ OTT Type / ott_type / restricted list / NA
 - This script does some minimal validation of the OTT custom fields.
 - Validation does not compare fields. For example, we check that episode# is an integer, but we don't check if ep 2 has been used more than once within a series/season.
 
-## ROADMAP
+### ROADMAP - IMPROVE ERROR HANDLING
 
-- Error handling
+- OTT Type: cannot be different within the same series.
+- OTT Season Number: cannot be duplicated within the same series.
+- OTT Episode Number: cannot be duplicated within the same season or the same series.
 
-WHERE TO STORE SERIES INFO (* indicates chosen option)
-*Brightcove custom fields: 1st ep only  
-Brightcove custom fields: all videos  
-Brightcove dummy CMS records  
-CPAD, would still need to call BC for video URL, ott_flag, genres
-Brightcove playlists: max 100 videos, name and description fields only  
-Brightcove folders: name field only  
+### ROADMAP - FIND BETTER PLACE FOR SERIES INFO
+
+Some of the available options:  
+  
+- Brightcove custom fields - 1st ep only. This is what we are currently doing. Issue: sometimes there is no 1st ep.
+- New DAM.
+- Brightcove custom fields - all videos.
+- Brightcove dummy CMS records.
+- CPAD. Issue: would still need to call BC for video URL, ott_flag, genres.
+- Brightcove playlists. Issues: max 100 videos, name and description fields only.
+- Brightcove folders. Issues: name field only.
