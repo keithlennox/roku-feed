@@ -50,6 +50,8 @@ const getBrightcoveSeriesThumb = async (bcSeriesItem) => {
 exports.createRokuVideo = (bcItem) => {
 
   //Validate fields required for all videos
+  if(!bcItem.reference_id) {throw new ReferenceError("Reference id missing for video " + bcItem.id);}
+  if(!bcItem.custom_fields.ott_type) {throw new ReferenceError("ott_type missing for video " + bcItem.reference_id);}
   if(!bcItem.custom_fields.ott_release_date || !date.isValid(bcItem.custom_fields.ott_release_date, 'YYYY-MM-DD')) {throw new ReferenceError("ott_release_date missing or malformed for video " + bcItem.reference_id);}
   if(!bcItem.video_url) {throw new ReferenceError("No video url found for " + bcItem.reference_id);}
   if(!bcItem.custom_fields.ott_rating) {throw new ReferenceError("ott_rating missing for video " + bcItem.reference_id);}
