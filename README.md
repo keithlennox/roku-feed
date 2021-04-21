@@ -21,11 +21,11 @@ https://d81ef65ednp0p.cloudfront.net/tvokids/feed.json
 - We cannot use the BC Playback API. Results are geo-restricted and return max of 1000 videos.
 - We cannot use the BC Social Syndication API. Returns 100 videos at a time, but Roku does not page thru results. Does not offer a solution to host series images.
 
-### BC CUSTOM FIELDS (Display name / Internal name / Data type / TS XML field)
+## BC CUSTOM FIELDS (Display name / Internal name / Data type / TS XML field)
 
 This script uses the following Brightcove custom fields:  
   
-**OTT Episode Number / ott_episode_number / text / EPISODE_ORDER**  
+OTT Episode Number / ott_episode_number / text / EPISODE_ORDER  
 The episode number for this video. Numeric values only, no leading zeros, no text. -- Required if OTT Type = "series with seasons" or "series without seasons".  
   
 OTT Flag / ott_flag / restricted list: true, false  / NA  
