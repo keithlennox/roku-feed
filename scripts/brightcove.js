@@ -51,7 +51,6 @@ exports.getBrightcoveVideos = async (account) => {
   let counter = 0; //initialize counter
   let bcVideos = []; //Create empty videos array
   const search = "ott_flag:true";
-  //const search = "ott_flag:false";
   console.log(`Offset: ${counter} - Array length: ${bcVideos.length}`)
   while(counter === bcVideos.length) { //Get next 100 videos until no more are returned
     for (let i = 1; i <=3; i++) { //Retry on error
