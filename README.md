@@ -25,8 +25,8 @@ https://d81ef65ednp0p.cloudfront.net/tvokids/feed.json
 
 This script uses the following Brightcove custom fields:  
   
-*OTT Episode Number / ott_episode_number / text / EPISODE_ORDER*  
-The episode number for this video. Numeric values only, no leading zeros, no text. -- Required if OTT Type = "series with seasons" or "series without seasons".  
+OTT Episode Number / ott_episode_number / text / EPISODE_ORDER  
+*The episode number for this video. Numeric values only, no leading zeros, no text. -- Required if OTT Type = "series with seasons" or "series without seasons".*  
   
 OTT Flag / ott_flag / restricted list: true, false  / NA  
 Controls whether this video appears on Roku or not. Leaving this field blank is the same as choosing false. -- Required for all OTT videos.  
