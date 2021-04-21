@@ -29,34 +29,34 @@ OTT Episode Number / ott_episode_number / text / EPISODE_ORDER
 *The episode number for this video. Numeric values only, no leading zeros, no text. -- Required if OTT Type = "series with seasons" or "series without seasons".*  
   
 OTT Flag / ott_flag / restricted list: true, false  / NA  
-Controls whether this video appears on Roku or not. Leaving this field blank is the same as choosing false. -- Required for all OTT videos.  
+*Controls whether this video appears on Roku or not. Leaving this field blank is the same as choosing false. -- Required for all OTT videos.*  
   
 OTT Genres / ott_series_genres / text: comma separated list / NA  
-Comma separated list of genres. Accepted values: action, adventure, animals, animated, anime, children, comedy, crime, documentary, drama, educational, fantasy, faith, food, fashion, gaming, health, history, horror, miniseries, mystery, nature, news, reality, romance, science, science fiction, sitcom, special, sports, thriller, technology. -- Required on the first episode of every season if OTT Type = "series with seasons" or the first episode of a series if OTT Type = "series without seasons". Also required if OTT Type = "movies" or "tv specials".  
+*Comma separated list of genres. Accepted values: action, adventure, animals, animated, anime, children, comedy, crime, documentary, drama, educational, fantasy, faith, food, fashion, gaming, health, history, horror, miniseries, mystery, nature, news, reality, romance, science, science fiction, sitcom, special, sports, thriller, technology. -- Required on the first episode of every season if OTT Type = "series with seasons" or the first episode of a series if OTT Type = "series without seasons". Also required if OTT Type = "movies" or "tv specials".*  
   
 OTT Rating / ott_rating / text / AgeRating  
-The rating for the video content. Must be one of the following values: 14+, 18+, C, C8, E, G, PG. -- Required for all OTT videos.  
+*The rating for the video content. Must be one of the following values: 14+, 18+, C, C8, E, G, PG. -- Required for all OTT videos.*  
   
 OTT Release Date / ott_release_date / text: YYYY-MM-DD / AirDate  
-YYYY-MM-DD. Used by Roku to sort programs chronologically and generate the “Recently Added” category. -- Required for all OTT videos.  
+*YYYY-MM-DD. Used by Roku to sort programs chronologically and generate the “Recently Added” category. -- Required for all OTT videos.*  
   
 OTT Season Number / ott_season_number / text / SeasonNumber  
-The season number for this video. Numeric values only, no leading zeros, no text. -- Required if OTT Type = "series with seasons".  
+*The season number for this video. Numeric values only, no leading zeros, no text. -- Required if OTT Type = "series with seasons".*  
   
 OTT Series Description / ott_series_description / text / ShortDescription  
-A description of the series that does not exceed 200 characters. The text will be clipped if longer. -- Required on the first episode of every season if OTT Type = "series with seasons" or the first episode of a series if OTT Type = "series without seasons".  
+*A description of the series that does not exceed 200 characters. The text will be clipped if longer. -- Required on the first episode of every season if OTT Type = "series with seasons" or the first episode of a series if OTT Type = "series without seasons".*  
   
 OTT Series Name / ott_series_name / text / SeriesTitle  
-The title of the series in plain text. This field is used for matching in Roku Search. Do not include extra information such as year, version, and so on. -- Required if OTT Type = "series with seasons" or "series without seasons".  
+*The title of the series in plain text. This field is used for matching in Roku Search. Do not include extra information such as year, version, and so on. -- Required if OTT Type = "series with seasons" or "series without seasons".*  
   
 OTT Series Number / ott_series_number / text / TVOSeries  
-A unique identifier for this series that does not exceed 50 characters. Four digit Telescope series# is preferred. Can be modified to include letters, dashes and underscores if required. No special characters. -- Required if OTT Type = "series with seasons" or "series without seasons".  
+*A unique identifier for this series that does not exceed 50 characters. Four digit Telescope series# is preferred. Can be modified to include letters, dashes and underscores if required. No special characters. -- Required if OTT Type = "series with seasons" or "series without seasons".*  
   
 OTT Tags / ott_series_tags / text: comma separated list / NA  
-Comma separated list of tags (for example: dramas,docs,news). Each tag is limited to 20 characters. Tags are used to define what content will be shown within a category. -- Required on the first episode of every season if OTT Type = "series with seasons" or the first episode of a series if OTT Type = "series without seasons". Also required if OTT Type = "movies" or "tv specials".  
+*Comma separated list of tags (for example: dramas,docs,news). Each tag is limited to 20 characters. Tags are used to define what content will be shown within a category. -- Required on the first episode of every season if OTT Type = "series with seasons" or the first episode of a series if OTT Type = "series without seasons". Also required if OTT Type = "movies" or "tv specials".*  
   
 OTT Type / ott_type / restricted list / NA  
-The type of content: movies, tv specials, series with seasons, series without seasons. -- Required for all OTT videos.  
+*The type of content: movies, tv specials, series with seasons, series without seasons. -- Required for all OTT videos.*  
 
 ## ERROR HANDLING
 
