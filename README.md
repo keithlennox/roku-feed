@@ -65,7 +65,7 @@ OTT Type / ott_type / restricted list / NA
 - After the issue is fixed, the script can be manually re-run and the video should now be added to the Roku feed.
 - Brightcove OTT custom fields are just string types without any validation happening on the Brightcove end.
 - This script does some minimal validation of the OTT custom fields.
-- Validation does not compare fields. For example, we check that episode# is an integer, but we don't check if ep 2 has been used more than once within a series/season.
+- Validation does not compare fields. For example, we check that episode# is an integer, but we don't check if ep 2 has been used more than once within a series/season. This can cause unexpected errors that can be difficult to trouble shoot. For example, if a different ott_type is used within the same series, this will cause node.js to throw the error "Cannot read property 'push' of undefined" or "Cannot read property 'findIndex' of undefined", which are not that helpful.
 
 ## ROADMAP
 
