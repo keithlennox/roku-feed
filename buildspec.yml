@@ -10,6 +10,7 @@ phases:
     commands:
       - echo Entered the install phase...
       - npm install
+      - npm install serverless
   build:
     commands:
       - echo Entered the build phase...

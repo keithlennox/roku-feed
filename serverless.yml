@@ -5,17 +5,15 @@ provider:
   runtime: nodejs14.x
   region: ca-central-1
   stage: ${opt:stage, 'prod'}
-  profile: mikegriff
-  iam:
-    role: arn:aws:iam::378926212662:role/service-role/roku-feed-prod-role-px6vv9ya
 
 functions:
-  roku-feed:
+  roku-feed-prod:
+    role: arn:aws:iam::378926212662:role/service-role/roku-feed-prod-role-px6vv9ya
     handler: index.handler
-    events:
-      - eventBridge:
-          eventBus: arn:aws:events:ca-central-1:378926212662:rule/roku-feed-tvo
-          schedule: cron(15 10 * * ? *)
+    # events:
+      # - eventBridge:
+        #  eventBus: arn:aws:events:ca-central-1:378926212662:rule/roku-feed-tvo
+        #  schedule: cron(15 10 * * ? *)
           # input:
           #   key1: value1
 

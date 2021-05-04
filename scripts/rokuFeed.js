@@ -94,10 +94,10 @@ exports.createRokuFeed = async (bcObject) => {
 exports.writeRokuFeed = async (rokuFeed, account) => {
   let folder;
   if(account === "18140038001") {
-    folder = "tvo";
+    folder = "qa/tvo";
   }else if(account === "15364602001") 
   {
-    folder = "tvokids";
+    folder = "qa/tvokids";
   }
   const params = { Bucket: "ott-feeds", Key: `roku/${folder}/feed.json`, Body: `${JSON.stringify(rokuFeed)}`, ContentType: "application/json"}; //S3 defaults to application/octet-stream if ContentType omitted
   try {
@@ -109,3 +109,5 @@ exports.writeRokuFeed = async (rokuFeed, account) => {
   }
   return false;
 }
+
+
