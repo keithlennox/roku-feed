@@ -36,11 +36,11 @@ const getBrightcoveSeriesThumb = async (bcSeriesItem) => {
   let folder;
   if(bcSeriesItem.account_id === "18140038001") {folder = "tvo";}else if(bcSeriesItem.account_id === "15364602001") {folder = "tvokids";}
   try{
-    await axios.get(`https://d81ef65ednp0p.cloudfront.net/images/series/${folder}/${bcSeriesItem.custom_fields.ott_series_number}.jpg`);
-    return `https://d81ef65ednp0p.cloudfront.net/images/series/${folder}/${bcSeriesItem.custom_fields.ott_series_number}.jpg`;
+    await axios.get(`${process.env.THUMBNAIL_ROOT_FOLDER}/${folder}/${bcSeriesItem.custom_fields.ott_series_number}.jpg`);
+    return `${process.env.THUMBNAIL_ROOT_FOLDER}/${folder}/${bcSeriesItem.custom_fields.ott_series_number}.jpg`;
   }catch(error){
     console.error(`JPG not found for series ${bcSeriesItem.custom_fields.ott_series_number} - ${error}`);
-    return `https://d81ef65ednp0p.cloudfront.net/images/series/${folder}/placeholder.jpg`;
+    return `${process.env.THUMBNAIL_ROOT_FOLDER}/${folder}/placeholder.jpg`;
   }
 }
 
