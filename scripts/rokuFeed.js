@@ -94,12 +94,12 @@ exports.createRokuFeed = async (bcObject) => {
 exports.writeRokuFeed = async (rokuFeed, account) => {
   let folder;
   if(account === "18140038001") {
-    folder = "qa/tvo";
+    folder = "tvo";
   }else if(account === "15364602001") 
   {
-    folder = "qa/tvokids";
+    folder = "tvokids";
   }
-  const params = { Bucket: "ott-feeds", Key: `roku/${folder}/feed.json`, Body: `${JSON.stringify(rokuFeed)}`, ContentType: "application/json"}; //S3 defaults to application/octet-stream if ContentType omitted
+  const params = {Bucket: process.env.S3_BUCKET, Key: `${process.env.FEED_ROOT_FOLDER}/${folder}/feed.json`, Body: `${JSON.stringify(rokuFeed)}`, ContentType: "application/json"}; //S3 defaults to application/octet-stream if ContentType omitted
   try {
     const putResponse = await s3.putObject(params).promise();
     console.log("Write to feed response: " + JSON.stringify(putResponse));
