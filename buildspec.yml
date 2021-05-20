@@ -15,4 +15,4 @@ phases:
     commands:
       - echo Entered the build phase...
       - echo Build started on `date`
-      - npx serverless deploy -v
+      - npx serverless deploy -v –stage $ENV_NAME –region ca-central-1 
