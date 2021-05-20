@@ -11,10 +11,10 @@ functions:
     role: arn:aws:iam::378926212662:role/service-role/roku-feed-prod-role-px6vv9ya
     handler: index.handler
     environment:
-      BRIGHTCOVE_CLIENT_SECRET: ${ssm:/roku-feed/prod/brightcove-client-secret~true}
-      BRIGHTCOVE_CLIENT_ID: ${ssm:/roku-feed/prod/brightcove-client-id~true}
-      S3_BUCKET: ${ssm:/roku-feed/prod/bucket}
-      THUMBNAIL_ROOT_FOLDER: ${ssm:/roku-feed/prod/thumbnail-root-folder}
+      BRIGHTCOVE_CLIENT_SECRET: ${ssm:/roku-feed/brightcove-client-secret~true}
+      BRIGHTCOVE_CLIENT_ID: ${ssm:/roku-feed/brightcove-client-id~true}
+      S3_BUCKET: ${ssm:/roku-feed/s3-bucket}
+      THUMBNAIL_ROOT_FOLDER: ${ssm:/roku-feed/thumbnail-root-folder}
       FEED_ROOT_FOLDER: ${ssm:/roku-feed/${opt:stage, 'qa'}/feed-root-folder}
 
 package:
