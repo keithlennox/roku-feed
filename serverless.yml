@@ -1,4 +1,4 @@
-service: roku-feed
+service: ott
 
 provider:
   name: aws
