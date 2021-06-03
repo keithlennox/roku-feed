@@ -46,7 +46,7 @@ const sleep = (ms) => {
 //Get Brightcove video metadata
 //Accepts a Brightcove account id
 //Returns array of objects containing metadata for all videos in account that match the search criteria
-exports.getBrightcoveVideos = async (account) => {
+exports.getBrightcoveVideos = async () => {
   console.log("Retrieving videos");
   let counter = 0; //initialize counter
   let bcVideos = []; //Create empty videos array
@@ -56,7 +56,7 @@ exports.getBrightcoveVideos = async (account) => {
     for (let i = 1; i <=3; i++) { //Retry on error
       try{
         let options = await getToken();
-        let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?sort=created_at&query=" + search + "&limit=100&offset=" + counter, options);
+        let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + ACCOUNT + "/videos?sort=created_at&query=" + search + "&limit=100&offset=" + counter, options);
         bcVideos.push(...response.data);
         break; //No need to retry
       }catch(error){
