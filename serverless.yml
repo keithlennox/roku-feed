@@ -1,23 +1,19 @@
-service: roku-feed
+service: ott
 
 provider:
   name: aws
   runtime: nodejs14.x
   region: ca-central-1
-  stage: ${opt:stage, 'prod'}
-  profile: mikegriff
-  iam:
-    role: arn:aws:iam::378926212662:role/service-role/roku-feed-prod-role-px6vv9ya
+  stage: ${opt:stage, 'qa'}
 
 functions:
   roku-feed:
+    role: arn:aws:iam::378926212662:role/service-role/roku-feed-prod-role-px6vv9ya
     handler: index.handler
-    events:
-      - eventBridge:
-          eventBus: arn:aws:events:ca-central-1:378926212662:rule/roku-feed-tvo
-          schedule: cron(15 10 * * ? *)
-          # input:
-          #   key1: value1
+    environment:
+      BRIGHTCOVE_CLIENT_SECRET: ${ssm:/roku-feed/brightcove-client-secret~true}
+      BRIGHTCOVE_CLIENT_ID: ${ssm:/roku-feed/brightcove-client-id~true}
+      S3_BUCKET: ${ssm:/roku-feed/s3-bucket}
 
 package:
   exclude:
@@ -27,7 +23,6 @@ package:
     - docker-compose.yml
     - Dockerfile
     - README.md
-
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

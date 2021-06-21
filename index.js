@@ -2,12 +2,16 @@ const { getBrightcoveVideos, getBrightcoveSource } = require('./scripts/brightco
 const { createRokuFeed, writeRokuFeed } = require('./scripts/rokuFeed.js');
 
 exports.handler = async (event) => {
-  
-  let account = event.account;
-  console.log("Handler function triggered for account " + account);
+
+  global.ACCOUNT = event.account;
+  global.FEED_FOLDER = event.feedFolder;
+  global.IMAGE_FOLDER = event.imageFolder;
+
+  //let account = event.account;
+  console.log("Handler function triggered for account " + ACCOUNT);
 
   //Get Brightcove videos where ott_flag = roku
-  let bcVideos = await getBrightcoveVideos(account);
+  let bcVideos = await getBrightcoveVideos();
 
   //Get video URLs for Brightcove videos
   let bcSourcedVideos = await getBrightcoveSource(bcVideos);
@@ -16,9 +20,9 @@ exports.handler = async (event) => {
   let rokuFeed = await createRokuFeed(bcSourcedVideos);
 
   //Write roku feed to file
-  let feedUpdateStatus = await writeRokuFeed(rokuFeed.feed, account);
+  let feedUpdateStatus = await writeRokuFeed(rokuFeed.feed);
 
   //Log results
-  console.log(`account: ${account} - find: ${bcVideos.length} - add: ${rokuFeed.count} - write: ${feedUpdateStatus}`);
+  console.log(`account: ${ACCOUNT} - find: ${bcVideos.length} - add: ${rokuFeed.count} - write: ${feedUpdateStatus}`);
   
 }

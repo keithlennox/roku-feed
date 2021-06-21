@@ -6,12 +6,13 @@ env:
 phases:
   install:
     runtime-versions:
-      nodejs: 14.x
+      nodejs: 12
     commands:
       - echo Entered the install phase...
       - npm install
+      - npm install serverless
   build:
     commands:
       - echo Entered the build phase...
       - echo Build started on `date`
-      - npx serverless deploy -v
+      - npx serverless deploy -v --stage $ENV_NAME --region ca-central-1

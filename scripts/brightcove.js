@@ -9,8 +9,8 @@ const axios = require('axios');
 
 //Get API token (required for all Brightcove API calls)
 const getToken = async () => {
-  const client_id = "0662e8e3-fd23-436f-a872-67bf00efbbf6";
-  const client_secret = "K_ID0Da0pSxkRty0uIL9Pqa9hevEnavqjnNtOMxJ7sUFRGvsQkXAmMFzEskhYPUJcarP12q6RG5LmCHfWHKhkw";
+  const client_id = process.env.BRIGHTCOVE_CLIENT_ID;
+  const client_secret = process.env.BRIGHTCOVE_CLIENT_SECRET;
   var auth_string = new Buffer(client_id + ":" + client_secret).toString('base64');
   const oauth_body = "grant_type=client_credentials";
   const oauth_options = {
@@ -46,7 +46,7 @@ const sleep = (ms) => {
 //Get Brightcove video metadata
 //Accepts a Brightcove account id
 //Returns array of objects containing metadata for all videos in account that match the search criteria
-exports.getBrightcoveVideos = async (account) => {
+exports.getBrightcoveVideos = async () => {
   console.log("Retrieving videos");
   let counter = 0; //initialize counter
   let bcVideos = []; //Create empty videos array
@@ -56,7 +56,7 @@ exports.getBrightcoveVideos = async (account) => {
     for (let i = 1; i <=3; i++) { //Retry on error
       try{
         let options = await getToken();
-        let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + account + "/videos?sort=created_at&query=" + search + "&limit=100&offset=" + counter, options);
+        let response = await axios.get("https://cms.api.brightcove.com/v1/accounts/" + ACCOUNT + "/videos?sort=created_at&query=" + search + "&limit=100&offset=" + counter, options);
         bcVideos.push(...response.data);
         break; //No need to retry
       }catch(error){
