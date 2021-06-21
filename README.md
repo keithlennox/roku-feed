@@ -32,7 +32,7 @@ OTT Flag / ott_flag / restricted list: true, false  / NA
 *Controls whether this video appears on Roku or not. Leaving this field blank is the same as choosing false. -- Required for all OTT videos.*  
   
 OTT Genres / ott_series_genres / text: comma separated list / NA  
-*Comma separated list of genres. Accepted values: action, adventure, animals, animated, anime, children, comedy, crime, documentary, drama, educational, fantasy, faith, food, fashion, gaming, health, history, horror, miniseries, mystery, nature, news, reality, romance, science, science fiction, sitcom, special, sports, thriller, technology. -- Required on the first episode of every season if OTT Type = "series with seasons" or the first episode of a series if OTT Type = "series without seasons". Also required if OTT Type = "movies" or "tv specials".*  
+*Comma separated list. Accepted values: action, adventure, animals, animated, anime, children, comedy, crime, documentary, drama, educational, fantasy, faith, food, fashion, gaming, health, history, horror, miniseries, mystery, nature, news, reality, romance, science, science fiction, sitcom, special, sports, thriller, technology. -- Required on the first episode of every season if OTT Type = "series with seasons" or the first episode of a series if OTT Type = "series without seasons". Also required if OTT Type = "movies" or "tv specials".*  
   
 OTT Rating / ott_rating / text / AgeRating  
 *The rating for the video content. Must be one of the following values: 14+, 18+, C, C8, E, G, PG. -- Required for all OTT videos.*  
@@ -43,7 +43,7 @@ OTT Release Date / ott_release_date / text: YYYY-MM-DD / AirDate
 OTT Season Number / ott_season_number / text / SeasonNumber  
 *The season number for this video. Numeric values only, no leading zeros, no text. -- Required if OTT Type = "series with seasons".*  
   
-OTT Series Description / ott_series_description / text / ShortDescription  
+OTT Series Description / ott_series_description / text / SeriesDescription  
 *A description of the series that does not exceed 200 characters. The text will be clipped if longer. -- Required on the first episode of every season if OTT Type = "series with seasons" or the first episode of a series if OTT Type = "series without seasons".*  
   
 OTT Series Name / ott_series_name / text / SeriesTitle  
